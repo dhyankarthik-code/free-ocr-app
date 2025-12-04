@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
   // In production, this would use NextAuth.js or similar
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/auth/callback/facebook`
+  const redirectUri = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/auth/callback/facebook`
   const appId = process.env.FACEBOOK_APP_ID || "mock-app-id"
 
   // Build Facebook OAuth URL
