@@ -80,12 +80,11 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
     </div>
   ) : (
     <div className="bg-white rounded-2xl p-6 shadow-lg space-y-3">
-      <button
+      <InteractiveHoverButton
         onClick={onLoginClick}
-        className="w-full text-center py-3 text-gray-700 hover:text-red-500 transition-colors font-medium"
-      >
-        Login
-      </button>
+        text="Login"
+        className="w-full"
+      />
       <InteractiveHoverButton
         onClick={onLoginClick}
         text="Sign up"
@@ -127,21 +126,19 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
               <span className="text-sm text-red-600 font-semibold">{session.name?.[0] || session.email[0].toUpperCase()}</span>
             </div>
             <span className="text-sm text-gray-700 font-medium hidden md:inline">{session.name || session.email}</span>
-            <button
+            <InteractiveHoverButton
               onClick={onLogout}
-              className="ml-2 bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-            >
-              Logout
-            </button>
+              text="Logout"
+              className="ml-2 px-4 py-1.5 text-sm h-8"
+            />
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <button
+            <InteractiveHoverButton
               onClick={onLoginClick}
-              className="text-sm text-gray-700 hover:text-red-500 transition-colors bg-white rounded-full px-4 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.12)] hidden md:block"
-            >
-              Login
-            </button>
+              text="Login"
+              className="text-sm px-4 py-2 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)] hidden md:block"
+            />
             <div className="bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)]">
               <InteractiveHoverButton
                 onClick={onLoginClick}
