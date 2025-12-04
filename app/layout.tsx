@@ -6,8 +6,8 @@ import "./globals.css"
 const geist = Geist({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Infygalaxy-OCR - AI-Powered OCR Platform",
-  description: "Extract text from images with advanced AI-powered OCR technology by Infygalaxy",
+  title: "Infy Galaxy – OCR | Free OCR Extraction and Report Generation Tool",
+  description: "The Necessary Tool For OCR Data Extraction – Go Beyond Extraction and Generate Reports, AI Summary, and Download in Various Formats",
   generator: "v0.app",
   icons: {
     icon: [

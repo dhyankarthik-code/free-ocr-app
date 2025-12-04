@@ -11,113 +11,27 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
-                            <img src="/logo.png" alt="Infygalaxy-OCR Logo" className="h-8 w-8" />
-                            <span className="text-xl font-bold text-white">Infygalaxy-OCR</span>
+                            <span className="text-xl font-bold text-white">Infy Galaxy – OCR</span>
                         </div>
-                        <p className="text-sm text-gray-400">
-                            Convert images into readable and editable documents with AI precision.
+                        <p className="text-sm text-gray-400 font-medium">
+                            Free OCR Extraction and Report Generation Tool
+                        </p>
+                        <p className="text-xs text-gray-500">
+                            The Necessary Tool For OCR Data Extraction – Go Beyond Extraction and Generate Reports, AI Summary, and Download in Various Formats
                         </p>
                     </div>
 
-                    {/* About Us */}
-                    <div>
-                        <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                            <Info className="w-4 h-4" />
-                            About Us
-                        </h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link href="/about" className="hover:text-red-500 transition-colors">
-                                    Our Story
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/about#team" className="hover:text-red-500 transition-colors">
-                                    Team
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/about#mission" className="hover:text-red-500 transition-colors">
-                                    Mission
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* OCR & Tools */}
-                    <div>
-                        <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                            <FileText className="w-4 h-4" />
-                            OCR & Tools
-                        </h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link href="/" className="hover:text-red-500 transition-colors">
-                                    Infygalaxy-OCR
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/tools" className="hover:text-red-500 transition-colors">
-                                    Image Tools
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/tools#converter" className="hover:text-red-500 transition-colors">
-                                    Format Converter
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/tools#resources" className="hover:text-red-500 transition-colors">
-                                    Resources
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* Blog & Support */}
-                    <div>
-                        <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                            <BookOpen className="w-4 h-4" />
-                            Resources
-                        </h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link href="/blog" className="hover:text-red-500 transition-colors">
-                                    Blog
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/blog#guides" className="hover:text-red-500 transition-colors">
-                                    Guides
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/blog#tutorials" className="hover:text-red-500 transition-colors">
-                                    Tutorials
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/contact" className="hover:text-red-500 transition-colors">
-                                    Contact
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
+                    {/* About Us - Removed */}
+                    {/* OCR & Tools - Removed */}
+                    {/* Resources - Removed */}
                 </div>
 
                 {/* Bottom Bar */}
                 <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-sm text-gray-400">
-                        © {new Date().getFullYear()} Infygalaxy-OCR. All rights reserved.
+                        © {new Date().getFullYear()} Infy Galaxy. All rights reserved.
                     </p>
-                    <div className="flex gap-6 text-sm">
-                        <Link href="/privacy" className="hover:text-red-500 transition-colors">
-                            Privacy Policy
-                        </Link>
-                        <Link href="/terms" className="hover:text-red-500 transition-colors">
-                            Terms of Service
-                        </Link>
-                    </div>
+                    {/* Privacy Policy and Terms of Service removed */}
                 </div>
             </div>
         </footer>
