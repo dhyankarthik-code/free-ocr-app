@@ -95,6 +95,13 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
 
   return (
     <>
+      {/* Fixed Branding - Always Visible */}
+      <div className="fixed top-8 left-8 z-[1002] pointer-events-auto">
+        <Link href="/" className="text-lg font-bold text-red-500 hover:text-red-600 transition-colors">
+          Infy Galaxy
+        </Link>
+      </div>
+
       {/* Menu temporarily hidden */}
       {/* <BubbleMenu
         logo={logoContent}
