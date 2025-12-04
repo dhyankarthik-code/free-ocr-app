@@ -66,21 +66,36 @@ export default function ImageToolsPage() {
                 onLoginClick={() => setShowAuthModal(true)}
             />
 
-            <main className="flex-1 container mx-auto px-4 py-12">
+            <main className="flex-1 container mx-auto px-4 py-12 pt-24">
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                         Image Tools
                     </h1>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
                         Professional image editing tools to enhance, modify, and optimize your images
                     </p>
+
+                    {/* Work in Progress Banner */}
+                    <div className="max-w-2xl mx-auto">
+                        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-8 text-center shadow-md">
+                            <div className="flex items-center justify-center mb-4">
+                                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <span className="text-4xl">🚧</span>
+                                </div>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-3">Work in Progress</h3>
+                            <p className="text-lg text-gray-700">
+                                All the below tools are work in progress, Will be launched soon
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Tools Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                {/* Tools Grid - Grayed Out */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto opacity-40 pointer-events-none">
                     {tools.map((tool, index) => (
-                        <Card key={index} className="hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+                        <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
                             <CardHeader>
                                 <div className={`w-12 h-12 rounded-lg ${tool.bgColor} flex items-center justify-center mb-4`}>
                                     <tool.icon className={`w-6 h-6 ${tool.color}`} />
@@ -95,15 +110,6 @@ export default function ImageToolsPage() {
                             </CardContent>
                         </Card>
                     ))}
-                </div>
-
-                {/* Coming Soon Banner */}
-                <div className="mt-16 text-center">
-                    <div className="inline-block bg-blue-50 border-2 border-blue-200 rounded-lg px-8 py-4">
-                        <p className="text-blue-800 font-semibold">
-                            🚀 More tools coming soon! Stay tuned.
-                        </p>
-                    </div>
                 </div>
             </main>
 
