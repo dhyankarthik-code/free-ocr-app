@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import Navbar from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -193,6 +194,27 @@ export default function LocalResultPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col pt-16">
+            {/* Top Left Branding */}
+            <div className="fixed top-4 left-4 z-50">
+                <Link href="/" className="text-lg font-bold text-red-500 hover:text-red-600 transition-colors">
+                    Infy Galaxy
+                </Link>
+            </div>
+
+            {/* Floating Logout Button - Only show when logged in */}
+            {session && (
+                <button
+                    onClick={logout}
+                    className="fixed bottom-6 right-6 z-50 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2 group"
+                    title="Logout"
+                >
+                    <span className="font-medium">Logout</span>
+                    <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            )}
+
             <Navbar
                 session={session}
                 onLogout={logout}

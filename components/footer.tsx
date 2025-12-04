@@ -21,9 +21,30 @@ export default function Footer() {
                         </p>
                     </div>
 
-                    {/* About Us - Removed */}
-                    {/* OCR & Tools - Removed */}
-                    {/* Resources - Removed */}
+                    {/* OCR & Tools */}
+                    <div>
+                        <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            OCR & Tools
+                        </h3>
+                        <ul className="space-y-2 text-sm">
+                            <li>
+                                <Link href="/tools" className="hover:text-red-500 transition-colors">
+                                    Image Tools
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/converter" className="hover:text-red-500 transition-colors">
+                                    Format Converter
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/resources" className="hover:text-red-500 transition-colors">
+                                    Resources
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
                 {/* Bottom Bar */}
