@@ -43,6 +43,11 @@ export default function Footer() {
                                     Resources
                                 </Link>
                             </li>
+                            <li>
+                                <Link href="/contact" className="hover:text-red-500 transition-colors">
+                                    Contact Us
+                                </Link>
+                            </li>
                         </ul>
                     </div>
                 </div>

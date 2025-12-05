@@ -13,85 +13,96 @@ export default function Home() {
   const [status, setStatus] = useState("")
   const [processingSteps, setProcessingSteps] = useState<string[]>([])
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const { session, logout } = useSession()
+
+  const handleUpload = async (file: File) => {
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File size exceeds 10MB limit")
+      return
+    }
+
+    setUploading(true)
+    setProgress(0)
+    setProcessingSteps(["Starting upload..."])
+
+    try {
+      // 1. Preprocess image (Client-side)
+      setProcessingSteps(prev => [...prev, "Optimizing image quality (Grayscale, Contrast)..."])
+      setStatus("Optimizing image for better accuracy...")
+
+      // Small delay to let user see the step
+      await new Promise(r => setTimeout(r, 800))
+
+      const { quickPreprocess } = await import('@/lib/image-preprocessing')
+      const preprocessedBlob = await quickPreprocess(file)
+
+      // Create form data with the preprocessed image
+      const formData = new FormData()
+      // Append with original filename but potentially different type/content
+      formData.append('file', preprocessedBlob, file.name)
+
+      console.log('Sending optimized image to OCR API...')
+      setProcessingSteps(prev => [...prev, "Sending to AI OCR engine..."])
+      setStatus("Processing with AI...")
+
+      // Call our OCR API endpoint
+      setProgress(30)
+      const response = await fetch('/api/ocr', {
+        method: 'POST',
+        body: formData,
+      })
+
+      console.log('API Response status:', response.status)
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('API Error:', errorData)
+        throw new Error(errorData.error || `OCR API failed: ${response.statusText}`)
+      }
+
+      setProcessingSteps(prev => [...prev, "Extracting text from response..."])
+      const data = await response.json()
+      console.log('OCR Response:', data)
+
+      const text = String(data?.text || "")
+      console.log('Extracted text length:', text.length)
+
+      if (!text || text.trim().length === 0) {
+        throw new Error('No text extracted from image')
+      }
+
+      setProcessingSteps(prev => [...prev, "Finalizing results..."])
+      setProgress(100)
+      sessionStorage.setItem("ocr_result", text)
+
+      // Small delay before redirect
+      await new Promise(r => setTimeout(r, 500))
+
+      console.log('Redirecting to results page...')
+      window.location.href = "/result/local"
+
+    } catch (error) {
+      console.error("OCR Error:", error)
+      alert(`Failed to process image: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      setUploading(false)
+      setProgress(0)
+      setProcessingSteps([])
+    }
+  }
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0]
       if (!file) return
 
-      if (file.size > 10 * 1024 * 1024) {
-        alert("File size exceeds 10MB limit")
+      if (!session) {
+        setPendingFile(file)
+        setShowAuthModal(true)
         return
       }
 
-      setUploading(true)
-      setProgress(0)
-      setProcessingSteps(["Starting upload..."])
-
-      try {
-        // 1. Preprocess image (Client-side)
-        setProcessingSteps(prev => [...prev, "Optimizing image quality (Grayscale, Contrast)..."])
-        setStatus("Optimizing image for better accuracy...")
-
-        // Small delay to let user see the step
-        await new Promise(r => setTimeout(r, 800))
-
-        const { quickPreprocess } = await import('@/lib/image-preprocessing')
-        const preprocessedBlob = await quickPreprocess(file)
-
-        // Create form data with the preprocessed image
-        const formData = new FormData()
-        // Append with original filename but potentially different type/content
-        formData.append('file', preprocessedBlob, file.name)
-
-        console.log('Sending optimized image to OCR API...')
-        setProcessingSteps(prev => [...prev, "Sending to AI OCR engine..."])
-        setStatus("Processing with AI...")
-
-        // Call our OCR API endpoint
-        setProgress(30)
-        const response = await fetch('/api/ocr', {
-          method: 'POST',
-          body: formData,
-        })
-
-        console.log('API Response status:', response.status)
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          console.error('API Error:', errorData)
-          throw new Error(errorData.error || `OCR API failed: ${response.statusText}`)
-        }
-
-        setProcessingSteps(prev => [...prev, "Extracting text from response..."])
-        const data = await response.json()
-        console.log('OCR Response:', data)
-
-        const text = String(data?.text || "")
-        console.log('Extracted text length:', text.length)
-
-        if (!text || text.trim().length === 0) {
-          throw new Error('No text extracted from image')
-        }
-
-        setProcessingSteps(prev => [...prev, "Finalizing results..."])
-        setProgress(100)
-        sessionStorage.setItem("ocr_result", text)
-
-        // Small delay before redirect
-        await new Promise(r => setTimeout(r, 500))
-
-        console.log('Redirecting to results page...')
-        window.location.href = "/result/local"
-
-      } catch (error) {
-        console.error("OCR Error:", error)
-        alert(`Failed to process image: ${error instanceof Error ? error.message : 'Unknown error'}`)
-        setUploading(false)
-        setProgress(0)
-        setProcessingSteps([])
-      }
+      await handleUpload(file)
     },
     [session],
   )
@@ -131,10 +142,18 @@ export default function Home() {
       {/* Auth Modal */}
       {showAuthModal && (
         <AuthModal
-          onClose={() => setShowAuthModal(false)}
+          onClose={() => {
+            setShowAuthModal(false)
+            setPendingFile(null)
+          }}
           onSuccess={() => {
             setShowAuthModal(false)
-            // Trigger new upload attempt
+            if (pendingFile) {
+              handleUpload(pendingFile)
+              setPendingFile(null)
+            } else {
+              window.location.reload()
+            }
           }}
         />
       )}

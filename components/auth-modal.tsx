@@ -104,29 +104,8 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           </button> */}
         </div>
 
-        {/* Divider with "OR" */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-white text-gray-500 font-medium">OR</span>
-          </div>
-        </div>
-
-        {/* Continue without signing in */}
-        <button
-          onClick={onClose}
-          className="w-full py-2.5 px-4 text-gray-600 text-center text-sm hover:text-gray-900 transition-colors font-medium"
-        >
-          Continue without signing in
-        </button>
-
-        {/* Sign up link */}
-        <div className="mt-6 text-center text-sm text-gray-600">
-          Don't have account? <button onClick={() => window.location.href = '/signup'} className="text-blue-600 hover:text-blue-700 font-semibold hover:underline">Sign-Up</button>
-        </div>
       </div>
     </div>
+
   )
 }

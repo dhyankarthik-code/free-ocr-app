@@ -102,7 +102,7 @@ export default function ResourcesPage() {
                             <h2 className="text-2xl font-bold mb-3">Need More Help?</h2>
                             <p className="text-gray-600 mb-6">Can't find what you're looking for? Our support team is here to help!</p>
                             <div className="flex gap-4 justify-center flex-wrap">
-                                <Link href="/contact" className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">Contact Support</Link>
+                                <Link href="/contact" className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">Contact Us</Link>
                                 <Link href="/contact" className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-2 rounded-lg font-medium border-2 border-gray-200 transition-colors">Join Community</Link>
                             </div>
                         </CardContent>

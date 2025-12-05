@@ -96,7 +96,7 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
   return (
     <>
       {/* Fixed Branding - Always Visible */}
-      <div className="fixed top-8 left-8 z-[1002] pointer-events-auto">
+      <div className="fixed top-4 left-4 md:top-8 md:left-8 z-[1002] pointer-events-auto">
         <Link href="/" className="text-lg font-bold text-red-500 hover:text-red-600 transition-colors">
           Infy Galaxy
         </Link>
@@ -113,7 +113,7 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
       /> */}
 
       {/* User Profile Section - Outside Menu */}
-      <div className="fixed top-8 right-24 z-[1002] pointer-events-auto">
+      <div className="fixed top-4 right-4 md:top-8 md:right-24 z-[1002] pointer-events-auto">
         {session ? (
           <div className="flex items-center gap-3 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] px-4 py-2">
             {session.picture ? (

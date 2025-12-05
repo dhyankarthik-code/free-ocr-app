@@ -1,40 +1,87 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useMemo } from "react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSession } from "@/hooks/use-session"
 import AuthModal from "@/components/auth-modal"
 import ReCAPTCHA from "react-google-recaptcha"
-import { Loader2, CheckCircle2, Mail, User, Globe, Phone, MessageSquare } from "lucide-react"
+import { Loader2, CheckCircle2, Mail, User, Globe, Phone, MessageSquare, Search, X } from "lucide-react"
 
-const COUNTRIES = [
-    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
-    "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
-    "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada",
-    "Cape Verde", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia",
-    "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador",
-    "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia",
-    "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras",
-    "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica",
-    "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon",
-    "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives",
-    "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia",
-    "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua",
-    "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama",
-    "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda",
-    "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe",
-    "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia",
-    "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
-    "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey",
-    "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
-    "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-]
+const COUNTRY_PHONE_CODES: { [key: string]: { code: string, digits: number } } = {
+    "India": { code: "+91", digits: 10 },
+    "United States": { code: "+1", digits: 10 },
+    "United Kingdom": { code: "+44", digits: 10 },
+    "Canada": { code: "+1", digits: 10 },
+    "Australia": { code: "+61", digits: 9 },
+    "Germany": { code: "+49", digits: 11 },
+    "France": { code: "+33", digits: 9 },
+    "China": { code: "+86", digits: 11 },
+    "Japan": { code: "+81", digits: 10 },
+    "Brazil": { code: "+55", digits: 11 },
+    "Mexico": { code: "+52", digits: 10 },
+    "Italy": { code: "+39", digits: 10 },
+    "Spain": { code: "+34", digits: 9 },
+    "South Korea": { code: "+82", digits: 10 },
+    "Russia": { code: "+7", digits: 10 },
+    "Indonesia": { code: "+62", digits: 10 },
+    "Pakistan": { code: "+92", digits: 10 },
+    "Bangladesh": { code: "+880", digits: 10 },
+    "Nigeria": { code: "+234", digits: 10 },
+    "Egypt": { code: "+20", digits: 10 },
+    "Turkey": { code: "+90", digits: 10 },
+    "Philippines": { code: "+63", digits: 10 },
+    "Vietnam": { code: "+84", digits: 9 },
+    "Thailand": { code: "+66", digits: 9 },
+    "South Africa": { code: "+27", digits: 9 },
+    "Argentina": { code: "+54", digits: 10 },
+    "Poland": { code: "+48", digits: 9 },
+    "Ukraine": { code: "+380", digits: 9 },
+    "Malaysia": { code: "+60", digits: 9 },
+    "Saudi Arabia": { code: "+966", digits: 9 },
+    "Netherlands": { code: "+31", digits: 9 },
+    "Belgium": { code: "+32", digits: 9 },
+    "Sweden": { code: "+46", digits: 9 },
+    "Switzerland": { code: "+41", digits: 9 },
+    "Norway": { code: "+47", digits: 8 },
+    "Austria": { code: "+43", digits: 10 },
+    "Denmark": { code: "+45", digits: 8 },
+    "Finland": { code: "+358", digits: 9 },
+    "Singapore": { code: "+65", digits: 8 },
+    "New Zealand": { code: "+64", digits: 9 },
+    "Ireland": { code: "+353", digits: 9 },
+    "Portugal": { code: "+351", digits: 9 },
+    "Greece": { code: "+30", digits: 10 },
+    "Israel": { code: "+972", digits: 9 },
+    "United Arab Emirates": { code: "+971", digits: 9 },
+}
+
+const COUNTRIES = Object.keys(COUNTRY_PHONE_CODES).concat([
+    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Armenia", "Azerbaijan",
+    "Bahamas", "Bahrain", "Barbados", "Belarus", "Belize", "Benin", "Bhutan", "Bolivia",
+    "Bosnia and Herzegovina", "Botswana", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
+    "Cambodia", "Cameroon", "Cape Verde", "Central African Republic", "Chad", "Chile", "Colombia",
+    "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Djibouti",
+    "Dominica", "Dominican Republic", "Ecuador", "El Salvador", "Equatorial Guinea", "Eritrea",
+    "Estonia", "Ethiopia", "Fiji", "Gabon", "Gambia", "Georgia", "Ghana", "Grenada", "Guatemala",
+    "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "Iran", "Iraq",
+    "Jamaica", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia",
+    "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar",
+    "Malawi", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Micronesia",
+    "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia",
+    "Nauru", "Nepal", "Nicaragua", "Niger", "North Korea", "North Macedonia", "Oman", "Palau",
+    "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Qatar", "Romania", "Rwanda",
+    "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
+    "Sao Tome and Principe", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Slovakia", "Slovenia",
+    "Solomon Islands", "Somalia", "South Sudan", "Sri Lanka", "Sudan", "Suriname", "Syria", "Taiwan",
+    "Tajikistan", "Tanzania", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia",
+    "Turkmenistan", "Tuvalu", "Uganda", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela",
+    "Yemen", "Zambia", "Zimbabwe"
+]).sort()
 
 export default function ContactPage() {
     const { session, logout } = useSession()
@@ -46,44 +93,77 @@ export default function ContactPage() {
         mobile: "",
         message: ""
     })
+    const [countrySearch, setCountrySearch] = useState("")
+    const [showCountryDropdown, setShowCountryDropdown] = useState(false)
     const [captchaVerified, setCaptchaVerified] = useState(false)
     const [submitting, setSubmitting] = useState(false)
     const [submitted, setSubmitted] = useState(false)
     const [errors, setErrors] = useState<{ [key: string]: string }>({})
+    const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
     const recaptchaRef = useRef<ReCAPTCHA>(null)
+    const countryInputRef = useRef<HTMLInputElement>(null)
 
-    const validateName = (value: string) => {
-        // Only allow letters (a-z, A-Z) and spaces
-        const filtered = value.replace(/[^a-zA-Z\s]/g, "")
-        return filtered
-    }
-
-    const validateMobile = (value: string) => {
-        // Only allow numbers (0-9) and spaces
-        const filtered = value.replace(/[^0-9\s]/g, "")
-        return filtered
-    }
+    // Filter countries based on search
+    const filteredCountries = useMemo(() => {
+        if (!countrySearch) return COUNTRIES
+        return COUNTRIES.filter(country =>
+            country.toLowerCase().includes(countrySearch.toLowerCase())
+        )
+    }, [countrySearch])
 
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         return emailRegex.test(email)
     }
 
+    const getPhoneConfig = () => {
+        return COUNTRY_PHONE_CODES[formData.country] || { code: "", digits: 10 }
+    }
+
+    // Real-time validation - check if input contains invalid characters
+    const hasInvalidNameChars = (value: string) => {
+        return /[0-9]/.test(value) // Returns true if contains numbers
+    }
+
+    const hasInvalidMobileChars = (value: string) => {
+        return /[a-zA-Z]/.test(value) // Returns true if contains letters
+    }
+
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const filtered = validateName(e.target.value)
-        setFormData(prev => ({ ...prev, name: filtered }))
-        if (errors.name) setErrors(prev => ({ ...prev, name: "" }))
+        const value = e.target.value
+        setFormData(prev => ({ ...prev, name: value }))
+
+        // Real-time validation - show error immediately if invalid
+        if (hasInvalidNameChars(value)) {
+            setErrors(prev => ({ ...prev, name: "Name should contain only letters" }))
+        } else if (value.trim().length > 0 && value.trim().length < 2) {
+            setErrors(prev => ({ ...prev, name: "Name must be at least 2 characters" }))
+        } else {
+            setErrors(prev => ({ ...prev, name: "" }))
+        }
     }
 
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData(prev => ({ ...prev, email: e.target.value }))
-        if (errors.email) setErrors(prev => ({ ...prev, email: "" }))
+        const value = e.target.value
+        setFormData(prev => ({ ...prev, email: value }))
+
+        if (touched.email && value && !validateEmail(value)) {
+            setErrors(prev => ({ ...prev, email: "Please enter a valid email address" }))
+        } else {
+            setErrors(prev => ({ ...prev, email: "" }))
+        }
     }
 
     const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const filtered = validateMobile(e.target.value)
-        setFormData(prev => ({ ...prev, mobile: filtered }))
-        if (errors.mobile) setErrors(prev => ({ ...prev, mobile: "" }))
+        const value = e.target.value
+        setFormData(prev => ({ ...prev, mobile: value }))
+
+        // Real-time validation - show error immediately if invalid
+        if (hasInvalidMobileChars(value)) {
+            setErrors(prev => ({ ...prev, mobile: "Mobile number should contain only digits" }))
+        } else {
+            setErrors(prev => ({ ...prev, mobile: "" }))
+        }
     }
 
     const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -91,8 +171,10 @@ export default function ContactPage() {
         if (errors.message) setErrors(prev => ({ ...prev, message: "" }))
     }
 
-    const handleCountryChange = (value: string) => {
-        setFormData(prev => ({ ...prev, country: value }))
+    const handleCountrySelect = (country: string) => {
+        setFormData(prev => ({ ...prev, country: country, mobile: "" }))
+        setCountrySearch("")
+        setShowCountryDropdown(false)
         if (errors.country) setErrors(prev => ({ ...prev, country: "" }))
     }
 
@@ -100,16 +182,25 @@ export default function ContactPage() {
         setCaptchaVerified(!!value)
     }
 
+    const handleBlur = (field: string) => {
+        setTouched(prev => ({ ...prev, [field]: true }))
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        // Validate all fields
         const newErrors: { [key: string]: string } = {}
+        const phoneConfig = getPhoneConfig()
 
-        if (!formData.name.trim()) {
+        // Clean name (remove numbers for submission)
+        const cleanedName = formData.name.replace(/[^a-zA-Z\s]/g, "").trim()
+
+        if (!cleanedName) {
             newErrors.name = "Name is required"
-        } else if (formData.name.trim().length < 2) {
+        } else if (cleanedName.length < 2) {
             newErrors.name = "Name must be at least 2 characters"
+        } else if (hasInvalidNameChars(formData.name)) {
+            newErrors.name = "Name should contain only letters"
         }
 
         if (!formData.email.trim()) {
@@ -122,9 +213,16 @@ export default function ContactPage() {
             newErrors.country = "Please select a country"
         }
 
-        if (!formData.mobile.trim()) {
+        // Clean mobile (remove non-digits for validation)
+        const cleanedMobile = formData.mobile.replace(/[^0-9]/g, "")
+
+        if (!cleanedMobile) {
             newErrors.mobile = "Mobile number is required"
-        } else if (formData.mobile.replace(/\s/g, "").length < 7) {
+        } else if (hasInvalidMobileChars(formData.mobile)) {
+            newErrors.mobile = "Mobile number should contain only digits"
+        } else if (phoneConfig.code && cleanedMobile.length !== phoneConfig.digits) {
+            newErrors.mobile = `Mobile number must be exactly ${phoneConfig.digits} digits for ${formData.country}`
+        } else if (!phoneConfig.code && cleanedMobile.length < 7) {
             newErrors.mobile = "Please enter a valid mobile number"
         }
 
@@ -147,11 +245,16 @@ export default function ContactPage() {
         setSubmitting(true)
 
         try {
-            // Submit to API route which will handle Google Sheets and IP capture
             const response = await fetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    name: cleanedName,
+                    email: formData.email,
+                    country: formData.country,
+                    mobile: phoneConfig.code ? `${phoneConfig.code} ${cleanedMobile}` : cleanedMobile,
+                    message: formData.message
+                })
             })
 
             if (!response.ok) {
@@ -176,6 +279,8 @@ export default function ContactPage() {
         }
     }
 
+    const phoneConfig = getPhoneConfig()
+
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
             <Navbar
@@ -185,7 +290,6 @@ export default function ContactPage() {
             />
 
             <main className="flex-1 container mx-auto px-4 py-12 pt-24">
-                {/* Header */}
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                         Contact Us
@@ -230,13 +334,21 @@ export default function ContactPage() {
                                         <Input
                                             name="name"
                                             type="text"
-                                            required
                                             value={formData.name}
                                             onChange={handleNameChange}
+                                            onBlur={() => handleBlur("name")}
                                             placeholder="Enter your full name (letters only)"
-                                            className={`w-full ${errors.name ? "border-red-500" : ""}`}
+                                            className={`w-full transition-all ${errors.name
+                                                    ? "border-red-500 border-2 bg-red-50 focus:ring-red-500 focus:border-red-500"
+                                                    : ""
+                                                }`}
                                         />
-                                        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                                        {errors.name && (
+                                            <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                                <X className="w-3 h-3" />
+                                                {errors.name}
+                                            </p>
+                                        )}
                                     </div>
 
                                     {/* Email */}
@@ -248,56 +360,143 @@ export default function ContactPage() {
                                         <Input
                                             name="email"
                                             type="email"
-                                            required
                                             value={formData.email}
                                             onChange={handleEmailChange}
+                                            onBlur={() => handleBlur("email")}
                                             placeholder="your.email@example.com"
-                                            className={`w-full ${errors.email ? "border-red-500" : ""}`}
+                                            className={`w-full transition-all ${errors.email
+                                                    ? "border-red-500 border-2 bg-red-50 focus:ring-red-500 focus:border-red-500"
+                                                    : ""
+                                                }`}
                                         />
-                                        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                                        {errors.email && (
+                                            <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                                <X className="w-3 h-3" />
+                                                {errors.email}
+                                            </p>
+                                        )}
                                     </div>
 
-                                    {/* Country Dropdown */}
-                                    <div>
+                                    {/* Country Dropdown with Search */}
+                                    <div className="relative">
                                         <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                                             <Globe className="w-4 h-4" />
                                             Country *
                                         </label>
-                                        <Select
-                                            required
-                                            value={formData.country}
-                                            onValueChange={handleCountryChange}
-                                        >
-                                            <SelectTrigger className={`w-full ${errors.country ? "border-red-500" : ""}`}>
-                                                <SelectValue placeholder="Select your country" />
-                                            </SelectTrigger>
-                                            <SelectContent className="max-h-[300px]">
-                                                {COUNTRIES.map((country) => (
-                                                    <SelectItem key={country} value={country}>
-                                                        {country}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country}</p>}
+                                        <div className="relative">
+                                            <div className="relative">
+                                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                <Input
+                                                    ref={countryInputRef}
+                                                    type="text"
+                                                    value={formData.country ? formData.country : countrySearch}
+                                                    onChange={(e) => {
+                                                        setCountrySearch(e.target.value)
+                                                        if (formData.country) {
+                                                            setFormData(prev => ({ ...prev, country: "" }))
+                                                        }
+                                                    }}
+                                                    onFocus={() => setShowCountryDropdown(true)}
+                                                    placeholder="Search and select your country..."
+                                                    className={`w-full pl-10 pr-8 transition-all ${errors.country
+                                                            ? "border-red-500 border-2 bg-red-50 focus:ring-red-500 focus:border-red-500"
+                                                            : ""
+                                                        }`}
+                                                />
+                                                {formData.country && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setFormData(prev => ({ ...prev, country: "", mobile: "" }))
+                                                            setCountrySearch("")
+                                                            countryInputRef.current?.focus()
+                                                        }}
+                                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {/* Dropdown List */}
+                                            {showCountryDropdown && !formData.country && (
+                                                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                                                    {filteredCountries.length === 0 ? (
+                                                        <div className="px-4 py-3 text-gray-500 text-sm">
+                                                            No country found
+                                                        </div>
+                                                    ) : (
+                                                        filteredCountries.map((country) => (
+                                                            <button
+                                                                key={country}
+                                                                type="button"
+                                                                onClick={() => handleCountrySelect(country)}
+                                                                className="w-full px-4 py-2.5 text-left hover:bg-red-50 flex items-center justify-between transition-colors"
+                                                            >
+                                                                <span>{country}</span>
+                                                                {COUNTRY_PHONE_CODES[country] && (
+                                                                    <span className="text-xs text-gray-500">
+                                                                        {COUNTRY_PHONE_CODES[country].code}
+                                                                    </span>
+                                                                )}
+                                                            </button>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {errors.country && (
+                                            <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                                <X className="w-3 h-3" />
+                                                {errors.country}
+                                            </p>
+                                        )}
+
+                                        {/* Click outside to close */}
+                                        {showCountryDropdown && !formData.country && (
+                                            <div
+                                                className="fixed inset-0 z-40"
+                                                onClick={() => setShowCountryDropdown(false)}
+                                            />
+                                        )}
                                     </div>
 
-                                    {/* Mobile */}
+                                    {/* Mobile with Country Code */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                                             <Phone className="w-4 h-4" />
                                             Mobile *
                                         </label>
-                                        <Input
-                                            name="mobile"
-                                            type="tel"
-                                            required
-                                            value={formData.mobile}
-                                            onChange={handleMobileChange}
-                                            placeholder="+1 234 567 8900 (numbers only)"
-                                            className={`w-full ${errors.mobile ? "border-red-500" : ""}`}
-                                        />
-                                        {errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
+                                        <div className="flex gap-2">
+                                            {phoneConfig.code && (
+                                                <div className="flex items-center px-3 border rounded-md bg-gray-50 text-sm font-medium text-gray-700 min-w-[60px] justify-center">
+                                                    {phoneConfig.code}
+                                                </div>
+                                            )}
+                                            <Input
+                                                name="mobile"
+                                                type="tel"
+                                                value={formData.mobile}
+                                                onChange={handleMobileChange}
+                                                onBlur={() => handleBlur("mobile")}
+                                                placeholder={phoneConfig.code ? `Enter ${phoneConfig.digits} digits` : "Enter mobile number"}
+                                                className={`flex-1 transition-all ${errors.mobile
+                                                        ? "border-red-500 border-2 bg-red-50 focus:ring-red-500 focus:border-red-500"
+                                                        : ""
+                                                    }`}
+                                            />
+                                        </div>
+                                        {errors.mobile && (
+                                            <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                                <X className="w-3 h-3" />
+                                                {errors.mobile}
+                                            </p>
+                                        )}
+                                        {formData.country && phoneConfig.code && !errors.mobile && (
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {formData.country} requires exactly {phoneConfig.digits} digits
+                                            </p>
+                                        )}
                                     </div>
 
                                     {/* Message */}
@@ -308,13 +507,21 @@ export default function ContactPage() {
                                         </label>
                                         <Textarea
                                             name="message"
-                                            required
                                             value={formData.message}
                                             onChange={handleMessageChange}
+                                            onBlur={() => handleBlur("message")}
                                             placeholder="How can we help you?"
-                                            className={`w-full min-h-[120px] ${errors.message ? "border-red-500" : ""}`}
+                                            className={`w-full min-h-[120px] transition-all ${errors.message
+                                                    ? "border-red-500 border-2 bg-red-50 focus:ring-red-500 focus:border-red-500"
+                                                    : ""
+                                                }`}
                                         />
-                                        {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
+                                        {errors.message && (
+                                            <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                                <X className="w-3 h-3" />
+                                                {errors.message}
+                                            </p>
+                                        )}
                                     </div>
 
                                     {/* reCAPTCHA */}
