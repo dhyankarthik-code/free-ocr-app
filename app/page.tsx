@@ -6,6 +6,7 @@ import UploadZone from "@/components/upload-zone"
 import AuthModal from "@/components/auth-modal"
 import Footer from "@/components/footer"
 import { useSession } from "@/hooks/use-session"
+import TextType from "@/components/text-type"
 
 export default function Home() {
   const [uploading, setUploading] = useState(false)
@@ -122,9 +123,19 @@ export default function Home() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-8">
         <div className="w-full max-w-2xl">
-          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 text-center text-balance">
-            Free OCR Extraction tool and Report Generation Tool
-          </h1>
+          <div className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 text-center text-balance min-h-[4rem] flex items-center justify-center">
+            <TextType
+              text={["Free OCR Extraction tool", "and Report Generation Tool", "Free OCR Extraction tool and Report Generation Tool"]}
+              typingSpeed={50}
+              pauseDuration={1500}
+              showCursor={true}
+              cursorCharacter="|"
+              loop={false}
+              onSentenceComplete={(sentence, index) => {
+                // Keep the final sentence
+              }}
+            />
+          </div>
 
 
           <p className="text-sm md:text-base text-gray-500 text-center mb-8 text-balance">
