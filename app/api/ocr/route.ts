@@ -1,6 +1,10 @@
 import { Mistral } from '@mistralai/mistralai';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Configure Vercel Serverless Function timeout (seconds)
+// Hobby plan: 10s (limit), Pro: 300s. We set 60s hoping for best effort or Pro upgrade.
+export const maxDuration = 60;
+
 // Helper function to log detailed error information
 function logError(error: any, context: string = '') {
     console.error(`[${new Date().toISOString()}] Error${context ? ' in ' + context : ''}:`, {
@@ -97,10 +101,10 @@ export async function POST(request: NextRequest) {
             console.log('Initializing Mistral client...');
             const client = new Mistral({ apiKey });
 
-            // User requested specific model: Mistral OCR 25.05
-            console.log('Using requested model: mistral-ocr-25.05...');
+            // User requested specific model: Switching to latest stable
+            console.log('Using model: mistral-ocr-latest...');
             const ocrResponse = await client.ocr.process({
-                model: "mistral-ocr-25.05",
+                model: "mistral-ocr-latest",
                 document: {
                     type: "image_url",
                     imageUrl: imageUrl,
