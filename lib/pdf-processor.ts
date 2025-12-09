@@ -3,8 +3,8 @@ const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
 
 // Config for v3 Node.js usage
 if (typeof window === 'undefined') {
-  // Disable worker for Node.js environment in v3
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+    // Disable worker for Node.js environment in v3
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 }
 
 export interface PDFPageResult {
@@ -17,7 +17,9 @@ export interface PDFPageResult {
  */
 export async function extractPDFPages(pdfBuffer: Buffer): Promise<PDFPageResult[]> {
     try {
-        const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
+        // Convert Node.js Buffer to Uint8Array (required by pdfjs-dist)
+        const data = new Uint8Array(pdfBuffer);
+        const pdf = await pdfjsLib.getDocument({ data }).promise;
         const pageResults: PDFPageResult[] = [];
 
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
