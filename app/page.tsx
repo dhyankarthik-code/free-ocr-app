@@ -69,6 +69,20 @@ export default function Home() {
       const data = await response.json()
       console.log('OCR Response:', data)
 
+      // Handle PDF multi-page response
+      if (data.isPDF && data.pages) {
+        console.log(`PDF processed: ${data.totalPages} pages`)
+        setProcessingSteps(prev => [...prev, "Finalizing PDF results..."])
+        setProgress(100)
+        sessionStorage.setItem("ocr_result", JSON.stringify(data))
+
+        await new Promise(r => setTimeout(r, 500))
+        console.log('Redirecting to results page...')
+        window.location.href = "/result/local"
+        return
+      }
+
+      // Handle single image response
       const text = String(data?.text || "")
       console.log('Extracted text length:', text.length)
 
@@ -97,8 +111,31 @@ export default function Home() {
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
+      if (!acceptedFiles || acceptedFiles.length === 0) return
+
+      // Validation: Max 5 files
+      if (acceptedFiles.length > 5) {
+        alert("Maximum 5 files allowed per upload. Please select fewer files.")
+        return
+      }
+
+      // Validation: Individual file size (10MB each)
+      const oversizedFile = acceptedFiles.find(file => file.size > 10 * 1024 * 1024)
+      if (oversizedFile) {
+        alert(`File "${oversizedFile.name}" exceeds 10MB limit. Please select a smaller file.`)
+        return
+      }
+
+      // Validation: Total batch size (10MB for multiple files)
+      if (acceptedFiles.length > 1) {
+        const totalSize = acceptedFiles.reduce((sum, file) => sum + file.size, 0)
+        if (totalSize > 10 * 1024 * 1024) {
+          alert(`Total file size (${(totalSize / 1024 / 1024).toFixed(1)}MB) exceeds 10MB limit for batch uploads. Please select smaller files.`)
+          return
+        }
+      }
+
       const file = acceptedFiles[0]
-      if (!file) return
 
       // Skip login requirement for local development
       const isLocalhost = typeof window !== 'undefined' &&

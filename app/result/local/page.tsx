@@ -28,14 +28,35 @@ export default function LocalResultPage() {
     const [summary, setSummary] = useState("")
     const [generatingSummary, setGeneratingSummary] = useState(false)
     const [showAuthModal, setShowAuthModal] = useState(false)
+    const [isMultiPage, setIsMultiPage] = useState(false)
+    const [pages, setPages] = useState<Array<{ pageNumber: number, text: string }>>([])
+    const [currentPage, setCurrentPage] = useState(1)
 
     useEffect(() => {
-        const storedText = sessionStorage.getItem("ocr_result")
-        if (!storedText) {
+        const storedData = sessionStorage.getItem("ocr_result")
+        if (!storedData) {
             router.push("/")
             return
         }
-        setText(storedText)
+
+        try {
+            // Try to parse as JSON (PDF/batch result)
+            const parsed = JSON.parse(storedData)
+            if (parsed.isPDF && parsed.pages) {
+                setIsMultiPage(true)
+                setPages(parsed.pages)
+                setCurrentPage(1)
+                // Set text to first page for initial display
+                setText(parsed.pages[0]?.text || "")
+            } else if (typeof parsed === 'string') {
+                setText(parsed)
+            } else {
+                setText(storedData)
+            }
+        } catch {
+            // Not JSON, treat as plain text
+            setText(storedData)
+        }
         setLoading(false)
     }, [router])
 
@@ -222,16 +243,51 @@ export default function LocalResultPage() {
                     <div className="lg:col-span-2 space-y-6">
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-xl font-bold">Extracted Text</CardTitle>
-                                <div className="relative w-64">
-                                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                                    <Input
-                                        placeholder="Search in text..."
-                                        className="pl-8"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
+                                <div className="flex items-center gap-4">
+                                    <CardTitle className="text-xl font-bold">Extracted Text</CardTitle>
+                                    {isMultiPage && (
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    const newPage = Math.max(1, currentPage - 1);
+                                                    setCurrentPage(newPage);
+                                                    setText(pages[newPage - 1]?.text || "");
+                                                }}
+                                                disabled={currentPage === 1}
+                                            >
+                                                ← Prev
+                                            </Button>
+                                            <span className="text-sm font-medium text-gray-600">
+                                                Page {currentPage} of {pages.length}
+                                            </span>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    const newPage = Math.min(pages.length, currentPage + 1);
+                                                    setCurrentPage(newPage);
+                                                    setText(pages[newPage - 1]?.text || "");
+                                                }}
+                                                disabled={currentPage === pages.length}
+                                            >
+                                                Next →
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
+                                {!isMultiPage && (
+                                    <div className="relative w-64">
+                                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                                        <Input
+                                            placeholder="Search in text..."
+                                            className="pl-8"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+                                    </div>
+                                )}
                             </CardHeader>
                             <CardContent>
                                 <div className="min-h-[500px] max-h-[700px] overflow-y-auto p-4 bg-gray-50 rounded-md border font-mono text-sm whitespace-pre-wrap">

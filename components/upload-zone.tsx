@@ -21,7 +21,12 @@ export default function UploadZone({ onDrop, uploading, progress, processingStep
       "image/jpeg": [".jpg", ".jpeg"],
       "image/png": [".png"],
       "image/webp": [".webp"],
+      "image/gif": [".gif"],
+      "image/bmp": [".bmp"],
+      "application/pdf": [".pdf"],
     },
+    multiple: true,
+    maxFiles: 5,
     disabled: uploading,
   })
 
@@ -53,11 +58,11 @@ export default function UploadZone({ onDrop, uploading, progress, processingStep
         </div>
 
         <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 text-center">
-          {isDragActive ? "Drop image here!" : "Select or Drop Image"}
+          {isDragActive ? "Drop files here!" : "Select or Drop Files"}
         </h3>
 
         <p className="text-gray-500 text-center max-w-sm mb-8">
-          Upload any image to extract text instantly with AI precision.
+          Upload images or PDFs to extract text. Max 5 files, 10MB each.
         </p>
 
         {/* Button-like visual */}
