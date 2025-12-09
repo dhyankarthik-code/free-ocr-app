@@ -167,6 +167,7 @@ export default function Home() {
       }
 
       const file = acceptedFiles[0]
+      const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
 
       // Skip login requirement for local development
       const isLocalhost = typeof window !== 'undefined' &&
@@ -178,7 +179,74 @@ export default function Home() {
         return
       }
 
-      await handleUpload(file)
+      // Single PDF or single image - use standard upload
+      if (isPDF || imageFiles.length === 1) {
+        await handleUpload(file)
+        return
+      }
+
+      // Multiple images - batch process
+      setUploading(true)
+      setProgress(0)
+      setProcessingSteps(["Starting batch upload..."])
+
+      try {
+        const pageResults: Array<{ pageNumber: number; text: string; imageName: string }> = []
+
+        for (let i = 0; i < imageFiles.length; i++) {
+          const imageFile = imageFiles[i]
+          setProcessingSteps(prev => [...prev, `Processing image ${i + 1} of ${imageFiles.length}: ${imageFile.name}...`])
+          setProgress(Math.round(((i) / imageFiles.length) * 80))
+
+          // Preprocess image
+          const { quickPreprocess } = await import('@/lib/image-preprocessing')
+          const preprocessedBlob = await quickPreprocess(imageFile)
+
+          // Call OCR API
+          const formData = new FormData()
+          formData.append('file', preprocessedBlob, imageFile.name)
+
+          const response = await fetch('/api/ocr', {
+            method: 'POST',
+            body: formData,
+          })
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            throw new Error(errorData.details || errorData.error || `Failed to process ${imageFile.name}`)
+          }
+
+          const data = await response.json()
+          const extractedText = String(data?.text || "")
+
+          pageResults.push({
+            pageNumber: i + 1,
+            text: extractedText,
+            imageName: imageFile.name
+          })
+        }
+
+        setProcessingSteps(prev => [...prev, "Finalizing batch results..."])
+        setProgress(100)
+
+        // Store as multi-page format for carousel
+        sessionStorage.setItem("ocr_result", JSON.stringify({
+          isPDF: false,
+          isBatch: true,
+          pages: pageResults,
+          totalPages: pageResults.length
+        }))
+
+        await new Promise(r => setTimeout(r, 500))
+        window.location.href = "/result/local"
+
+      } catch (error) {
+        console.error("Batch OCR Error:", error)
+        setValidationError(`Failed to process images: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        setUploading(false)
+        setProgress(0)
+        setProcessingSteps([])
+      }
     },
     [session],
   )

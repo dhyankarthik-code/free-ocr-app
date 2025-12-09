@@ -29,7 +29,8 @@ export default function LocalResultPage() {
     const [generatingSummary, setGeneratingSummary] = useState(false)
     const [showAuthModal, setShowAuthModal] = useState(false)
     const [isMultiPage, setIsMultiPage] = useState(false)
-    const [pages, setPages] = useState<Array<{ pageNumber: number, text: string }>>([])
+    const [isBatch, setIsBatch] = useState(false)
+    const [pages, setPages] = useState<Array<{ pageNumber: number, text: string, imageName?: string }>>([])
     const [currentPage, setCurrentPage] = useState(1)
 
     useEffect(() => {
@@ -42,8 +43,9 @@ export default function LocalResultPage() {
         try {
             // Try to parse as JSON (PDF/batch result)
             const parsed = JSON.parse(storedData)
-            if (parsed.isPDF && parsed.pages) {
+            if ((parsed.isPDF || parsed.isBatch) && parsed.pages) {
                 setIsMultiPage(true)
+                setIsBatch(parsed.isBatch === true)
                 setPages(parsed.pages)
                 setCurrentPage(1)
                 // Set text to first page for initial display
@@ -247,7 +249,12 @@ export default function LocalResultPage() {
                                 {isMultiPage && (
                                     <div className="flex items-center justify-between w-full">
                                         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg shadow-md">
-                                            <span className="text-lg font-bold">📄 Page {currentPage} of {pages.length}</span>
+                                            <span className="text-lg font-bold">
+                                                {isBatch
+                                                    ? `🖼️ Image ${currentPage} of ${pages.length}: ${pages[currentPage - 1]?.imageName || ''}`
+                                                    : `📄 Page ${currentPage} of ${pages.length}`
+                                                }
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Button
