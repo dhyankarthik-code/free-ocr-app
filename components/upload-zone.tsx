@@ -26,7 +26,7 @@ export default function UploadZone({ onDrop, uploading, progress, processingStep
       "application/pdf": [".pdf"],
     },
     multiple: true,
-    maxFiles: 5,
+    // Note: maxFiles removed - validation handled in page.tsx with on-screen warnings
     disabled: uploading,
   })
 
