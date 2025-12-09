@@ -38,7 +38,6 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
   const navLinks = [
     { label: 'About Us', href: '/about' },
     { label: 'OCR', href: '/' },
-    { label: 'Tools', href: '/tools' },
     { label: 'Blog', href: '/blog' },
   ]
 
@@ -85,9 +84,11 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <Link href="#" onClick={(e) => { e.preventDefault(); onLoginClick?.(); }} className="text-sm font-medium text-gray-700 hover:text-red-500 transition-colors">
-                Login
-              </Link>
+              <InteractiveHoverButton
+                onClick={() => { onLoginClick?.(); }}
+                text="Login"
+                className="px-5 py-2 text-sm h-9"
+              />
               <InteractiveHoverButton
                 onClick={onLoginClick}
                 text="Sign in"
@@ -136,12 +137,11 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
               </>
             ) : (
               <>
-                <button
+                <InteractiveHoverButton
                   onClick={() => { onLoginClick?.(); setMobileMenuOpen(false); }}
-                  className="text-center py-2 text-gray-700 font-medium"
-                >
-                  Login
-                </button>
+                  text="Login"
+                  className="w-full text-center"
+                />
                 <InteractiveHoverButton
                   onClick={() => { onLoginClick?.(); setMobileMenuOpen(false); }}
                   text="Sign in"

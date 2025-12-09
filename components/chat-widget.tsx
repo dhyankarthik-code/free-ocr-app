@@ -31,7 +31,23 @@ export default function ChatWidget() {
         scrollToBottom()
     }, [messages])
 
-    const handleSendMessage = () => {
+    const chatContainerRef = useRef<HTMLDivElement>(null)
+
+    // Close on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (chatContainerRef.current && !chatContainerRef.current.contains(event.target as Node) && isOpen) {
+                setIsOpen(false)
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside)
+        }
+    }, [isOpen])
+
+    const handleSendMessage = async () => {
         if (!inputValue.trim()) return
 
         const newUserMessage: Message = {
@@ -44,16 +60,44 @@ export default function ChatWidget() {
         setMessages(prev => [...prev, newUserMessage])
         setInputValue("")
 
-        // Simulated Bot Response (Local logic for now)
-        setTimeout(() => {
+        try {
+            // Call API
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: newUserMessage.text,
+                    // Note: In real app, we need to pass the actual OCR text context here if available. 
+                    // For now, let's assume it's stored in localStorage or context, or just empty if not.
+                    // But the previous file view showed it expects 'documentText'.
+                    // I will check if I can get it from localStorage or just pass empty string if not extracted yet.
+                    documentText: localStorage.getItem('extractedText') || "No document text available yet.",
+                    chatHistory: messages.map(m => ({
+                        role: m.sender === 'user' ? 'user' : 'assistant',
+                        content: m.text
+                    }))
+                })
+            });
+
+            const data = await response.json();
+
             const botResponse: Message = {
                 id: (Date.now() + 1).toString(),
-                text: "Thanks for your message! This is a demo response running locally. We will connect this to AI soon.",
+                text: data.reply || "I'm having trouble connecting right now.",
                 sender: 'bot',
                 timestamp: new Date()
             }
             setMessages(prev => [...prev, botResponse])
-        }, 1000)
+        } catch (error) {
+            console.error(error);
+            const botResponse: Message = {
+                id: (Date.now() + 1).toString(),
+                text: "Sorry, I encountered an error. Please try again.",
+                sender: 'bot',
+                timestamp: new Date()
+            }
+            setMessages(prev => [...prev, botResponse])
+        }
     }
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -64,7 +108,7 @@ export default function ChatWidget() {
     }
 
     return (
-        <div className="fixed bottom-6 right-6 z-[1003] flex flex-col items-end">
+        <div ref={chatContainerRef} className="fixed bottom-6 right-6 z-[1003] flex flex-col items-end">
             {/* Chat Window */}
             {isOpen && (
                 <div className="mb-4 w-[350px] md:w-[380px] h-[500px] bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-200">
@@ -93,8 +137,8 @@ export default function ChatWidget() {
                             >
                                 <div
                                     className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.sender === 'user'
-                                            ? 'bg-red-600 text-white rounded-tr-none'
-                                            : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'
+                                        ? 'bg-red-600 text-white rounded-tr-none'
+                                        : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'
                                         }`}
                                 >
                                     {msg.text}
@@ -129,8 +173,8 @@ export default function ChatWidget() {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`p-4 rounded-full shadow-lg transition-all duration-300 ${isOpen
-                        ? 'bg-gray-100 text-gray-600 rotate-90 scale-90'
-                        : 'bg-red-600 text-white hover:bg-red-700 hover:scale-105'
+                    ? 'bg-gray-100 text-gray-600 rotate-90 scale-90'
+                    : 'bg-red-600 text-white hover:bg-red-700 hover:scale-105'
                     }`}
             >
                 {isOpen ? <X size={24} /> : <MessageCircle size={28} />}

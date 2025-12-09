@@ -1,30 +1,43 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { Geist } from "next/font/google"
 import "./globals.css"
 
 const geist = Geist({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Infy Galaxy – OCR | Free OCR Extraction and Report Generation Tool",
-  description: "The Necessary Tool For OCR Data Extraction – Go Beyond Extraction and Generate Reports, AI Summary, and Download in Various Formats",
-  generator: "v0.app",
-  icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
+  title: {
+    default: "Infy Galaxy – Free OCR Tool | AI-Powered Text Extraction & Report Generation",
+    template: "%s | Infy Galaxy OCR"
+  },
+  description: "Free AI-Powered OCR Tool for instant text extraction from images and PDFs. Generate reports, AI summaries, and download in multiple formats. Fast, accurate, and secure document digitization.",
+  keywords: ["OCR", "text extraction", "free OCR tool", "PDF to text", "image to text", "AI OCR", "document digitization", "OCR online", "free text recognition", "Infy Galaxy"],
+  authors: [{ name: "Infy Galaxy" }],
+  creator: "Infy Galaxy",
+  publisher: "Infy Galaxy",
+  metadataBase: new URL('https://www.ocr-extraction.com'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://www.ocr-extraction.com',
+    title: 'Infy Galaxy – Free OCR Tool | AI-Powered Text Extraction',
+    description: 'Extract text from images and PDFs instantly with our free AI-powered OCR tool. Generate reports and download in various formats.',
+    siteName: 'Infy Galaxy OCR',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 }
 
@@ -42,7 +55,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geist.className} font-sans antialiased bg-white text-gray-900`}>{children}</body>
+      <body className={`${geist.className} font-sans antialiased bg-white text-gray-900`}>
+        {children}
+        <GoogleAnalytics gaId="G-230FBSCTMJ" />
+      </body>
     </html>
   )
 }

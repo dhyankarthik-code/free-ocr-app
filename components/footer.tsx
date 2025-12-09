@@ -29,16 +29,6 @@ export default function Footer() {
                         </h3>
                         <ul className="space-y-2 text-sm">
                             <li>
-                                <Link href="/converter" className="hover:text-red-500 transition-colors">
-                                    Format Converter
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/tools" className="hover:text-red-500 transition-colors">
-                                    Image Tools
-                                </Link>
-                            </li>
-                            <li>
                                 <Link href="/about-ocr" className="hover:text-red-500 transition-colors">
                                     About OCR
                                 </Link>
