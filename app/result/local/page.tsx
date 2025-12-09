@@ -295,6 +295,7 @@ export default function LocalResultPage() {
                                             />
                                         </div>
                                     )}
+                                </div>
                             </CardHeader>
                             <CardContent>
                                 <div className="min-h-[500px] max-h-[700px] overflow-y-auto p-4 bg-gray-50 rounded-md border font-mono text-sm whitespace-pre-wrap">
