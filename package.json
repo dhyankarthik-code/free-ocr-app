@@ -61,7 +61,7 @@
     "openai": "^6.10.0",
     "opencv.js": "^1.2.1",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^5.4.449",
+    "pdfjs-dist": "^3.11.174",
     "react": "^19.2.1",
     "react-day-picker": "9.8.0",
     "react-dom": "^19.2.1",

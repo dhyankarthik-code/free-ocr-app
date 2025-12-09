@@ -1,9 +1,10 @@
-import * as pdfjsLib from 'pdfjs-dist';
+// Import PDF.js using legacy build for Node.js support (Stable v3)
+const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
 
-// Set worker path for PDF.js
+// Config for v3 Node.js usage
 if (typeof window === 'undefined') {
-    // Server-side
-    pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.min.js');
+  // Disable worker for Node.js environment in v3
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 }
 
 export interface PDFPageResult {
@@ -31,6 +32,7 @@ export async function extractPDFPages(pdfBuffer: Buffer): Promise<PDFPageResult[
             await page.render({
                 canvasContext: context as any,
                 viewport: viewport,
+                canvas: canvas as any,
             }).promise;
 
             // Convert canvas to base64 PNG
