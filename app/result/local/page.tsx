@@ -242,10 +242,13 @@ export default function LocalResultPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
                         <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <div className="flex items-center gap-4">
-                                    <CardTitle className="text-xl font-bold">Extracted Text</CardTitle>
-                                    {isMultiPage && (
+                            <CardHeader className="flex flex-col space-y-3 pb-4">
+                                {/* Page Indicator for Multi-page Documents */}
+                                {isMultiPage && (
+                                    <div className="flex items-center justify-between w-full">
+                                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg shadow-md">
+                                            <span className="text-lg font-bold">📄 Page {currentPage} of {pages.length}</span>
+                                        </div>
                                         <div className="flex items-center gap-2">
                                             <Button
                                                 variant="outline"
@@ -256,12 +259,10 @@ export default function LocalResultPage() {
                                                     setText(pages[newPage - 1]?.text || "");
                                                 }}
                                                 disabled={currentPage === 1}
+                                                className="px-4"
                                             >
-                                                ← Prev
+                                                ◀ Prev
                                             </Button>
-                                            <span className="text-sm font-medium text-gray-600">
-                                                Page {currentPage} of {pages.length}
-                                            </span>
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -271,23 +272,29 @@ export default function LocalResultPage() {
                                                     setText(pages[newPage - 1]?.text || "");
                                                 }}
                                                 disabled={currentPage === pages.length}
+                                                className="px-4"
                                             >
-                                                Next →
+                                                Next ▶
                                             </Button>
                                         </div>
-                                    )}
-                                </div>
-                                {!isMultiPage && (
-                                    <div className="relative w-64">
-                                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                                        <Input
-                                            placeholder="Search in text..."
-                                            className="pl-8"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                        />
                                     </div>
                                 )}
+
+                                <div className="flex items-center justify-between w-full">
+                                    <CardTitle className="text-xl font-bold">
+                                        {isMultiPage ? `Extracted Text - Page ${currentPage}` : 'Extracted Text'}
+                                    </CardTitle>
+                                    {!isMultiPage && (
+                                        <div className="relative w-64">
+                                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                                            <Input
+                                                placeholder="Search in text..."
+                                                className="pl-8"
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                            />
+                                        </div>
+                                    )}
                             </CardHeader>
                             <CardContent>
                                 <div className="min-h-[500px] max-h-[700px] overflow-y-auto p-4 bg-gray-50 rounded-md border font-mono text-sm whitespace-pre-wrap">

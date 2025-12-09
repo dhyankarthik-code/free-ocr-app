@@ -16,6 +16,7 @@ export default function Home() {
   const [processingSteps, setProcessingSteps] = useState<string[]>([])
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
   const { session, logout } = useSession()
 
   const handleUpload = async (file: File) => {
@@ -117,26 +118,50 @@ export default function Home() {
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
+      setValidationError(null) // Clear previous errors
+
       if (!acceptedFiles || acceptedFiles.length === 0) return
 
-      // Validation: Max 5 files
-      if (acceptedFiles.length > 5) {
-        alert("Maximum 5 files allowed per upload. Please select fewer files.")
+      // Check for PDFs
+      const pdfFiles = acceptedFiles.filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'))
+      const imageFiles = acceptedFiles.filter(f => !f.type.includes('pdf') && !f.name.toLowerCase().endsWith('.pdf'))
+
+      // PDF validation: Only one PDF at a time
+      if (pdfFiles.length > 1) {
+        setValidationError("Only one PDF file can be uploaded at a time.")
+        return
+      }
+
+      // If PDF is included, it must be the only file
+      if (pdfFiles.length === 1 && imageFiles.length > 0) {
+        setValidationError("Please upload either a PDF or images, not both.")
+        return
+      }
+
+      // PDF size check (max 10MB)
+      if (pdfFiles.length === 1 && pdfFiles[0].size > 10 * 1024 * 1024) {
+        setValidationError(`PDF "${pdfFiles[0].name}" exceeds 10MB limit.`)
+        return
+      }
+
+      // Image validation: Max 5 images
+      if (imageFiles.length > 5) {
+        setValidationError("Maximum 5 images allowed per upload. Please select fewer files.")
         return
       }
 
       // Validation: Individual file size (10MB each)
       const oversizedFile = acceptedFiles.find(file => file.size > 10 * 1024 * 1024)
       if (oversizedFile) {
-        alert(`File "${oversizedFile.name}" exceeds 10MB limit. Please select a smaller file.`)
+        setValidationError(`File "${oversizedFile.name}" exceeds 10MB limit.`)
         return
       }
 
-      // Validation: Total batch size (10MB for multiple files)
-      if (acceptedFiles.length > 1) {
-        const totalSize = acceptedFiles.reduce((sum, file) => sum + file.size, 0)
+      // Validation: Total batch size (10MB for multiple images)
+      if (imageFiles.length > 1) {
+        const totalSize = imageFiles.reduce((sum, file) => sum + file.size, 0)
         if (totalSize > 10 * 1024 * 1024) {
-          alert(`Total file size (${(totalSize / 1024 / 1024).toFixed(1)}MB) exceeds 10MB limit for batch uploads. Please select smaller files.`)
+          setValidationError(`Total file size (${(totalSize / 1024 / 1024).toFixed(1)}MB) exceeds 10MB limit for batch uploads.`)
           return
         }
       }
@@ -194,6 +219,24 @@ export default function Home() {
             progress={progress}
             processingSteps={processingSteps}
           />
+
+          {/* Validation Error Display */}
+          {validationError && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2 text-red-700">
+                <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">{validationError}</span>
+              </div>
+              <button
+                onClick={() => setValidationError(null)}
+                className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
         </div>
       </main>
 
