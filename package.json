@@ -15,6 +15,7 @@
     "@hookform/resolvers": "^3.10.0",
     "@mistralai/mistralai": "^1.10.0",
     "@next/third-parties": "^16.0.8",
+    "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -64,6 +65,7 @@
     "openai": "^6.10.0",
     "opencv.js": "^1.2.1",
     "pdf-lib": "^1.17.1",
+    "pg": "^8.16.3",
     "prisma": "^7.1.0",
     "react": "^19.2.1",
     "react-day-picker": "9.8.0",
@@ -86,6 +88,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
+    "@types/pg": "^8.15.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-google-recaptcha": "^2.1.9",
