@@ -261,8 +261,25 @@ export default function Home() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-8">
-        <div className="w-full max-w-2xl">
+      <main className="relative flex-1 flex flex-col items-center justify-center p-6 md:p-8 overflow-hidden">
+        {/* Antigravity Animation Background */}
+        <div className="absolute inset-0 -z-10 opacity-50 pointer-events-none">
+          <Antigravity
+            count={200}
+            magnetRadius={12}
+            ringRadius={12}
+            waveSpeed={0.3}
+            waveAmplitude={1.5}
+            particleSize={2.5}
+            lerpSpeed={0.06}
+            color="#ef4444"
+            autoAnimate={true}
+            particleVariance={1.5}
+            rotationSpeed={0.2}
+          />
+        </div>
+
+        <div className="w-full max-w-2xl relative z-10">
           <div className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 text-center text-balance min-h-[4rem] flex items-center justify-center">
             <TextType
               text={["Free OCR Extraction tool", "and Report Generation Tool", "Free OCR Extraction tool and Report Generation Tool"]}
@@ -309,25 +326,8 @@ export default function Home() {
         </div>
 
         {/* Welcome Section */}
-        <section className="relative w-full max-w-5xl mt-20 px-4">
-          {/* Antigravity Animation Background */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[600px] -z-10 opacity-50 pointer-events-none">
-            <Antigravity
-              count={200}
-              magnetRadius={12}
-              ringRadius={12}
-              waveSpeed={0.3}
-              waveAmplitude={1.5}
-              particleSize={2.5}
-              lerpSpeed={0.06}
-              color="#ef4444"
-              autoAnimate={true}
-              particleVariance={1.5}
-              rotationSpeed={0.2}
-            />
-          </div>
-
-          <div className="relative z-10 text-center mb-12">
+        <section className="w-full max-w-5xl mt-20 px-4">
+          <div className="text-center mb-12">
             <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
               Welcome to <span className="text-red-500">OCR-Extraction.com</span>
             </h2>
