@@ -225,7 +225,10 @@ export default function LocalResultPage() {
 
             <main className="flex-1 container mx-auto px-4 py-8">
                 <div className="mb-6 flex items-center justify-between">
-                    <Button onClick={() => router.push("/")} className="gap-2 bg-red-600 hover:bg-red-700 text-white">
+                    <Button
+                        onClick={() => router.push("/")}
+                        className="gap-2 bg-red-600 hover:bg-red-700 text-white transition-all duration-300 hover:shadow-lg hover:shadow-red-500/50 hover:scale-[1.02]"
+                    >
                         <Upload className="w-4 h-4" /> Upload More Files
                     </Button>
                     <div className="flex gap-2">
