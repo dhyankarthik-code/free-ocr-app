@@ -15,11 +15,8 @@ model User {
   email         String    @unique
   name          String?
   picture       String?
-  phone         String?   // Optional: collected via profile form
-  organization  String?   // Optional: collected via profile form
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  lastLoginAt   DateTime  @default(now())
+  // Quota Tracking (Lifetime)
+  usagebytes    Int       @default(0)
   
   @@index([email])
   @@index([googleId])

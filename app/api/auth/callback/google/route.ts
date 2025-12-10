@@ -46,6 +46,35 @@ export async function GET(request: NextRequest) {
 
     const googleUser = await userResponse.json()
 
+    // Upsert user in database (only if DATABASE_URL is configured)
+    try {
+      // Dynamic import to avoid build-time errors when DATABASE_URL is not set
+      const { default: prisma } = await import("@/lib/db")
+
+      const existingUser = await prisma.user.findUnique({
+        where: { googleId: googleUser.sub }
+      })
+
+      if (!existingUser) {
+        await prisma.user.create({
+          data: {
+            googleId: googleUser.sub,
+            email: googleUser.email,
+            name: googleUser.name,
+            picture: googleUser.picture,
+            usagebytes: 0
+          }
+        })
+        console.log("[Auth] Created new user:", googleUser.email)
+      } else {
+        // Just verify user exists, no specific update needed for now
+        console.log("[Auth] User exists:", googleUser.email)
+      }
+    } catch (dbError) {
+      console.error("[Auth] Database error (non-fatal):", dbError)
+      // Continue even if DB fails - session will still work
+    }
+
     // Create session with real Google user data
     const user = {
       id: `google_${googleUser.sub}`,

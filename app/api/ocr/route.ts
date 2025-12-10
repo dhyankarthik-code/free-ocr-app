@@ -119,11 +119,53 @@ export async function POST(request: NextRequest) {
         const mistralApiKey = process.env.MISTRAL_API_KEY;
         const googleApiKey = process.env.GOOGLE_CLOUD_API_KEY;
 
+        const sessionCookie = request.cookies.get("session")?.value
+        let userEmail: string | null = null
+        let userGoogleId: string | null = null
+
+        if (sessionCookie) {
+            try {
+                const session = JSON.parse(sessionCookie)
+                userEmail = session.email
+                userGoogleId = session.id.replace("google_", "")
+            } catch (e) {
+                console.error("Session parse error", e)
+            }
+        }
+
         const formData = await request.formData();
         const file = formData.get('file') as File;
 
         if (!file) {
             return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+        }
+
+        const fileSizeMB = file.size / (1024 * 1024)
+        const FILE_SIZE_LIMIT_MB = 10
+
+        // Check Quota for Logged In Users
+        if (userGoogleId) {
+            try {
+                const { default: prisma } = await import("@/lib/db")
+
+                const user = await prisma.user.findUnique({
+                    where: { googleId: userGoogleId },
+                    select: { usagebytes: true }
+                })
+
+                if (user) {
+                    const currentUsageMB = (user.usagebytes || 0) / (1024 * 1024)
+
+                    if (currentUsageMB + fileSizeMB > FILE_SIZE_LIMIT_MB) {
+                        return NextResponse.json({
+                            error: 'Quota exceeded',
+                            details: 'You have reached the 10MB lifetime upload limit.'
+                        }, { status: 403 });
+                    }
+                }
+            } catch (dbError) {
+                console.error("Quota check failed", dbError)
+            }
         }
 
         console.log(`Processing file: ${file.name}, type: ${file.type}, size: ${file.size} bytes`);
@@ -190,6 +232,18 @@ export async function POST(request: NextRequest) {
                     };
                 });
 
+                if (userGoogleId) {
+                    try {
+                        const { default: prisma } = await import("@/lib/db")
+                        await prisma.user.update({
+                            where: { googleId: userGoogleId },
+                            data: { usagebytes: { increment: file.size } }
+                        })
+                    } catch (e) {
+                        console.error("Failed to update usage stats", e)
+                    }
+                }
+
                 return NextResponse.json({
                     success: true,
                     isPDF: true,
@@ -221,6 +275,18 @@ export async function POST(request: NextRequest) {
 
             const { validateAndCorrectOCR } = await import('@/lib/ocr-validator');
             const { correctedText, warnings } = validateAndCorrectOCR(cleanedText);
+
+            if (userGoogleId) {
+                try {
+                    const { default: prisma } = await import("@/lib/db")
+                    await prisma.user.update({
+                        where: { googleId: userGoogleId },
+                        data: { usagebytes: { increment: file.size } }
+                    })
+                } catch (e) {
+                    console.error("Failed to update usage stats", e)
+                }
+            }
 
             return NextResponse.json({
                 success: true,
