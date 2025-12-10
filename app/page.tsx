@@ -8,6 +8,7 @@ import Footer from "@/components/footer"
 import { useSession } from "@/hooks/use-session"
 import TextType from "@/components/text-type"
 import ChatWidget from "@/components/chat-widget"
+import Antigravity from "@/components/ui/Antigravity"
 
 export default function Home() {
   const [uploading, setUploading] = useState(false)
@@ -308,8 +309,25 @@ export default function Home() {
         </div>
 
         {/* Welcome Section */}
-        <section className="w-full max-w-5xl mt-20 px-4">
-          <div className="text-center mb-12">
+        <section className="relative w-full max-w-5xl mt-20 px-4">
+          {/* Antigravity Animation Background */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[600px] -z-10 opacity-50 pointer-events-none">
+            <Antigravity
+              count={200}
+              magnetRadius={12}
+              ringRadius={12}
+              waveSpeed={0.3}
+              waveAmplitude={1.5}
+              particleSize={2.5}
+              lerpSpeed={0.06}
+              color="#ef4444"
+              autoAnimate={true}
+              particleVariance={1.5}
+              rotationSpeed={0.2}
+            />
+          </div>
+
+          <div className="relative z-10 text-center mb-12">
             <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
               Welcome to <span className="text-red-500">OCR-Extraction.com</span>
             </h2>
