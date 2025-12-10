@@ -7,7 +7,7 @@ import Navbar from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Download, FileText, Search, ArrowLeft, Loader2 } from "lucide-react"
+import { Download, FileText, Search, ArrowLeft, Loader2, Upload } from "lucide-react"
 import { saveAs } from "file-saver"
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button"
 import { Document, Packer, Paragraph, TextRun } from "docx"
@@ -225,8 +225,8 @@ export default function LocalResultPage() {
 
             <main className="flex-1 container mx-auto px-4 py-8">
                 <div className="mb-6 flex items-center justify-between">
-                    <Button variant="ghost" onClick={() => router.push("/")} className="gap-2">
-                        <ArrowLeft className="w-4 h-4" /> Back to Upload
+                    <Button onClick={() => router.push("/")} className="gap-2 bg-red-600 hover:bg-red-700 text-white">
+                        <Upload className="w-4 h-4" /> Upload More Files
                     </Button>
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={handleDownloadTxt}>
