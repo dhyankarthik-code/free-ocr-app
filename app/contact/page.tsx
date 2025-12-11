@@ -112,8 +112,48 @@ export default function ContactPage() {
     }, [countrySearch])
 
     const validateEmail = (email: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        return emailRegex.test(email)
+        // Comprehensive email validation
+        // 1. Basic structure check: username@domain.tld
+        // 2. Allowed chars in username: letters, numbers, . _ - +
+        // 3. No consecutive dots (..)
+        // 4. No leading/trailing dots or hyphens in username or domain
+        // 5. Valid domain with TLD (at least 2 chars)
+
+        if (!email || email.length > 254) return false
+
+        // Split into username and domain
+        const parts = email.split('@')
+        if (parts.length !== 2) return false
+
+        const [username, domain] = parts
+
+        // Username validation
+        if (!username || username.length === 0 || username.length > 64) return false
+        if (/^[.\-_+]|[.\-_+]$/.test(username)) return false // No leading/trailing special chars
+        if (/\.\./.test(username)) return false // No consecutive dots
+        if (!/^[a-zA-Z0-9._\-+]+$/.test(username)) return false // Only allowed chars
+
+        // Domain validation
+        if (!domain || domain.length === 0) return false
+        if (/^[\-.]|[\-.]$/.test(domain)) return false // No leading/trailing dots or hyphens
+        if (/\.\./.test(domain)) return false // No consecutive dots
+
+        // Domain must have valid structure: subdomain(s).tld
+        const domainParts = domain.split('.')
+        if (domainParts.length < 2) return false // Need at least domain.tld
+
+        // TLD must be at least 2 characters and only letters
+        const tld = domainParts[domainParts.length - 1]
+        if (tld.length < 2 || !/^[a-zA-Z]+$/.test(tld)) return false
+
+        // Each domain part must be valid (letters, numbers, hyphens, no leading/trailing hyphens)
+        for (const part of domainParts) {
+            if (part.length === 0) return false
+            if (/^-|-$/.test(part)) return false // No leading/trailing hyphens
+            if (!/^[a-zA-Z0-9\-]+$/.test(part)) return false
+        }
+
+        return true
     }
 
     const getPhoneConfig = () => {
