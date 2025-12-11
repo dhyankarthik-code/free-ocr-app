@@ -153,7 +153,8 @@ export default function ContactPage() {
         const value = e.target.value
         setFormData(prev => ({ ...prev, email: value }))
 
-        if (touched.email && value && !validateEmail(value)) {
+        // Real-time validation - show error immediately if format is invalid
+        if (value && !validateEmail(value)) {
             setErrors(prev => ({ ...prev, email: "Please enter a valid email address" }))
         } else {
             setErrors(prev => ({ ...prev, email: "" }))
