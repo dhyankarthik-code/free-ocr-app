@@ -74,6 +74,16 @@ export default function Footer() {
                         </h3>
                         <ul className="space-y-2 text-sm">
                             <li>
+                                <Link href="/privacy" className="hover:text-red-500 transition-colors">
+                                    Privacy Policy
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/blog" className="hover:text-red-500 transition-colors">
+                                    Blog
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/contact" className="hover:text-red-500 transition-colors">
                                     Contact Us
                                 </Link>
@@ -83,11 +93,6 @@ export default function Footer() {
                                 <a href="mailto:admin@ocr-extraction.com" className="hover:text-red-500 transition-colors">
                                     admin@ocr-extraction.com
                                 </a>
-                            </li>
-                            <li>
-                                <Link href="/privacy" className="hover:text-red-500 transition-colors">
-                                    Privacy Policy
-                                </Link>
                             </li>
                         </ul>
                     </div>
