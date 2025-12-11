@@ -144,11 +144,11 @@ export default function Home() {
         return
       }
 
-      // Image validation: Max 5 images
-      if (imageFiles.length > 5) {
-        setValidationError("Maximum 5 images allowed per upload. Please select fewer files.")
-        return
-      }
+      // Image validation: Max 5 images (REMOVED)
+      // if (imageFiles.length > 5) {
+      //   setValidationError("Maximum 5 images allowed per upload. Please select fewer files.")
+      //   return
+      // }
 
       // Validation: Individual file size (10MB each)
       const oversizedFile = acceptedFiles.find(file => file.size > 10 * 1024 * 1024)
@@ -314,7 +314,7 @@ export default function Home() {
               Welcome to <span className="text-red-500">OCR-Extraction.com</span>
             </h2>
             <p className="text-xl md:text-2xl font-semibold text-gray-700 mb-6">
-              The World's Most Accurate Free OCR Tool
+              The World's Most Accurate OCR Tool for Free
             </p>
             <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Convert your images, scanned documents, and PDFs into clean, editable text in seconds.

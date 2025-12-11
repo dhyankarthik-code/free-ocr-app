@@ -294,15 +294,9 @@ export default function ContactPage() {
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                         Contact Us
                     </h1>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                         Have a question or need support? We're here to help!
                     </p>
-                    <div className="flex items-center justify-center gap-2 text-gray-600">
-                        <Mail className="w-5 h-5 text-red-500" />
-                        <a href="mailto:admin@ocr-extraction.com" className="hover:text-red-500 hover:underline transition-colors font-medium">
-                            admin@ocr-extraction.com
-                        </a>
-                    </div>
                 </div>
 
                 <div className="max-w-2xl mx-auto">
@@ -558,6 +552,14 @@ export default function ContactPage() {
                             </CardContent>
                         </Card>
                     )}
+
+                    {/* Email below form */}
+                    <div className="flex items-center justify-center gap-2 text-gray-600 mt-8">
+                        <Mail className="w-5 h-5 text-red-500" />
+                        <a href="mailto:admin@ocr-extraction.com" className="hover:text-red-500 hover:underline transition-colors font-medium">
+                            admin@ocr-extraction.com
+                        </a>
+                    </div>
                 </div>
             </main>
 

@@ -26,6 +26,10 @@ model User {
   lastLoginIp   String?
   lastLoginAt   DateTime?
   
+  // Privacy & Terms Consent
+  acceptedTerms Boolean   @default(false)
+  acceptedAt    DateTime?
+
   @@index([email])
   @@index([googleId])
 }

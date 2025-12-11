@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Geist } from "next/font/google"
 import "./globals.css"
+import ClientConsentWrapper from "@/components/client-consent-wrapper"
 
 const geist = Geist({ subsets: ["latin"] })
 
@@ -57,6 +58,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geist.className} font-sans antialiased bg-white text-gray-900`}>
         {children}
+        <ClientConsentWrapper />
         <GoogleAnalytics gaId="G-230FBSCTMJ" />
       </body>
     </html>

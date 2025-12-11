@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Heart, FileText, Wrench, BookOpen, Info } from "lucide-react"
+import { Heart, FileText, Wrench, BookOpen, Info, Mail } from "lucide-react"
 
 export default function Footer() {
     return (
@@ -77,6 +77,12 @@ export default function Footer() {
                                 <Link href="/contact" className="hover:text-red-500 transition-colors">
                                     Contact Us
                                 </Link>
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <Mail className="w-4 h-4 text-red-500" />
+                                <a href="mailto:admin@ocr-extraction.com" className="hover:text-red-500 transition-colors">
+                                    admin@ocr-extraction.com
+                                </a>
                             </li>
                         </ul>
                     </div>

@@ -89,7 +89,7 @@ export default function UploadZone({ onDrop, uploading, progress, processingStep
           </h3>
 
           <p className="text-gray-500 text-center max-w-sm mb-8">
-            Upload images or PDFs to extract text. Max 5 files, 10MB each.
+            Upload images or PDFs to extract text. Max 10MB total.
           </p>
 
           {/* Button-like visual */}
