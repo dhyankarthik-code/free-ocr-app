@@ -1,13 +1,19 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { MessageCircle, X, Send, Minus } from "lucide-react"
+import { useSession } from "@/hooks/use-session"
 
 interface Message {
     id: string
     text: string
     sender: 'user' | 'bot'
     timestamp: Date
+}
+
+// Generate unique session ID
+const generateSessionId = () => {
+    return 'chat_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9)
 }
 
 export default function ChatWidget() {
@@ -21,7 +27,21 @@ export default function ChatWidget() {
         }
     ])
     const [inputValue, setInputValue] = useState("")
+    const [sessionId, setSessionId] = useState<string>("")
+    const [hasUserSentMessage, setHasUserSentMessage] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null)
+    const { session } = useSession()
+
+    // Initialize session ID
+    useEffect(() => {
+        let storedSession = localStorage.getItem('chatSessionId')
+        if (!storedSession) {
+            storedSession = generateSessionId()
+            localStorage.setItem('chatSessionId', storedSession)
+        }
+        setSessionId(storedSession)
+    }, [])
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -33,11 +53,62 @@ export default function ChatWidget() {
 
     const chatContainerRef = useRef<HTMLDivElement>(null)
 
+    // Reset inactivity timer
+    const resetInactivityTimer = useCallback(() => {
+        if (inactivityTimerRef.current) {
+            clearTimeout(inactivityTimerRef.current)
+        }
+        // 5 minutes inactivity trigger
+        inactivityTimerRef.current = setTimeout(() => {
+            if (hasUserSentMessage) {
+                endConversation()
+            }
+        }, 5 * 60 * 1000)
+    }, [hasUserSentMessage])
+
+    // End conversation - send summary email
+    const endConversation = async () => {
+        if (!hasUserSentMessage || !sessionId) return
+
+        try {
+            await fetch('/api/chat/end', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId,
+                    userEmail: session?.email || null
+                })
+            })
+
+            // Reset for new conversation
+            const newSessionId = generateSessionId()
+            localStorage.setItem('chatSessionId', newSessionId)
+            setSessionId(newSessionId)
+            setHasUserSentMessage(false)
+            setMessages([{
+                id: '1',
+                text: "Hi there! 👋 How can I help you with OCR or our tools today?",
+                sender: 'bot',
+                timestamp: new Date()
+            }])
+        } catch (error) {
+            console.error('Failed to end conversation:', error)
+        }
+    }
+
+    // Handle close
+    const handleClose = () => {
+        setIsOpen(false)
+        if (hasUserSentMessage) {
+            endConversation()
+        }
+    }
+
     // Close on click outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (chatContainerRef.current && !chatContainerRef.current.contains(event.target as Node) && isOpen) {
-                setIsOpen(false)
+                handleClose()
             }
         }
 
@@ -45,10 +116,19 @@ export default function ChatWidget() {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside)
         }
-    }, [isOpen])
+    }, [isOpen, hasUserSentMessage])
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (inactivityTimerRef.current) {
+                clearTimeout(inactivityTimerRef.current)
+            }
+        }
+    }, [])
 
     const handleSendMessage = async () => {
-        if (!inputValue.trim()) return
+        if (!inputValue.trim() || !sessionId) return
 
         const newUserMessage: Message = {
             id: Date.now().toString(),
@@ -59,20 +139,18 @@ export default function ChatWidget() {
 
         setMessages(prev => [...prev, newUserMessage])
         setInputValue("")
+        setHasUserSentMessage(true)
+        resetInactivityTimer()
 
         try {
-            // Call API
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: newUserMessage.text,
-                    // Note: In real app, we need to pass the actual OCR text context here if available. 
-                    // For now, let's assume it's stored in localStorage or context, or just empty if not.
-                    // But the previous file view showed it expects 'documentText'.
-                    // I will check if I can get it from localStorage or just pass empty string if not extracted yet.
+                    sessionId,
                     documentText: localStorage.getItem('extractedText') || "No document text available yet.",
-                    chatHistory: messages.map(m => ({
+                    chatHistory: messages.slice(1).map(m => ({
                         role: m.sender === 'user' ? 'user' : 'assistant',
                         content: m.text
                     }))
@@ -88,6 +166,7 @@ export default function ChatWidget() {
                 timestamp: new Date()
             }
             setMessages(prev => [...prev, botResponse])
+            resetInactivityTimer()
         } catch (error) {
             console.error(error);
             const botResponse: Message = {
@@ -108,7 +187,7 @@ export default function ChatWidget() {
     }
 
     return (
-        <div ref={chatContainerRef} className="fixed bottom-6 right-6 z-[1003] flex flex-col items-end">
+        <div ref={chatContainerRef} className="fixed bottom-6 right-6 z-[50] flex flex-col items-end">
             {/* Chat Window */}
             {isOpen && (
                 <div className="mb-4 w-[350px] md:w-[380px] h-[500px] bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-200">
@@ -120,7 +199,7 @@ export default function ChatWidget() {
                         </div>
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={() => setIsOpen(false)}
+                                onClick={handleClose}
                                 className="hover:bg-red-700 p-1 rounded-full transition-colors"
                             >
                                 <Minus size={18} />

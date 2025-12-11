@@ -84,6 +84,11 @@ export default function Footer() {
                                     admin@ocr-extraction.com
                                 </a>
                             </li>
+                            <li>
+                                <Link href="/privacy" className="hover:text-red-500 transition-colors">
+                                    Privacy Policy
+                                </Link>
+                            </li>
                         </ul>
                     </div>
                 </div>

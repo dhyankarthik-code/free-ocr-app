@@ -7,29 +7,62 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
     try {
-        const { message, documentText, chatHistory } = await request.json()
+        const { message, documentText, chatHistory, sessionId } = await request.json()
 
-        if (!message || !documentText) {
+        if (!message) {
             return NextResponse.json(
-                { error: 'Message and document text are required' },
+                { error: 'Message is required' },
                 { status: 400 }
             )
         }
 
-        // Build conversation history
+        if (!sessionId) {
+            return NextResponse.json(
+                { error: 'Session ID is required' },
+                { status: 400 }
+            )
+        }
+
+        const { default: prisma } = await import("@/lib/db")
+
+        // Find or create conversation
+        let conversation = await prisma.chatConversation.findUnique({
+            where: { sessionId }
+        })
+
+        if (!conversation) {
+            conversation = await prisma.chatConversation.create({
+                data: { sessionId }
+            })
+        }
+
+        // Store user message
+        await prisma.chatMessage.create({
+            data: {
+                conversationId: conversation.id,
+                role: 'user',
+                content: message
+            }
+        })
+
+        // Build conversation history for AI
         const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
             {
                 role: 'system',
-                content: `You are "Infy Galaxy Support", an extremely professional and friendly AI assistant.
-Your goal is to help users with OCR issues, tool usage, or general inquiries about the platform.
+                content: `You are "Infy Galaxy Support", an extremely professional, friendly, and experienced AI customer support assistant.
+
+**YOUR PERSONALITY:**
+- Warm, helpful, and patient
+- Professional but not robotic
+- Empathetic and understanding
 
 **CRITICAL RULES:**
-1. **BE FRIENDLY & PROFESSIONAL**: Use a warm, helpful tone.
-2. **NO HALLUCINATIONS**: Strictly do NOT invent features or answers. If you are 100% sure, answer. If you are unsure, say: "I'm not completely sure about that, but I have noted this query and will notify our support team to help you directly."
-3. **CONTEXT**: The user is viewing a document with the following extracted text:
-"${documentText || '(No text extracted yet)'}"
+1. **BE HELPFUL**: Answer questions about OCR, the platform, file uploads, pricing (it's FREE!), and general tech support.
+2. **NO HALLUCINATIONS**: If you're unsure, say: "I'm not 100% sure about that specific detail, but I've noted your query and will have our support team reach out to you directly!"
+3. **ESCALATE GRACEFULLY**: For complex issues you can't handle, say: "This sounds like something our human support team should look into. I'll make sure they reach out to you soon!"
+4. **BE CONCISE**: Keep responses short and actionable (2-3 sentences max).
 
-Use this text to answer questions if asked about the document. Otherwise, help with general support.`
+**CONTEXT:** The user may be viewing a document. Document text: "${documentText || '(No document uploaded yet)'}"`
             },
             ...(chatHistory || []),
             {
@@ -38,39 +71,27 @@ Use this text to answer questions if asked about the document. Otherwise, help w
             }
         ]
 
-        // Log to Google Sheet (Fire and forget, don't await blocking response)
-        const sheetUrl = process.env.GOOGLE_SHEET_CHAT_URL;
-        if (sheetUrl) {
-            fetch(sheetUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    timestamp: new Date().toISOString(),
-                    userMessage: message,
-                    documentContext: documentText ? 'Present' : 'Empty',
-                    role: 'User Query'
-                })
-            }).catch(err => console.error('Failed to log to sheet:', err));
-        }
-
         const completion = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages,
-            temperature: 0.5, // Lower temperature for more deterministic/professional answers
-            max_tokens: 300,
+            temperature: 0.5,
+            max_tokens: 200,
         })
 
         const reply = completion.choices[0]?.message?.content || 'Sorry, I could not generate a response.'
 
-        return NextResponse.json({ reply })
+        // Store bot response
+        await prisma.chatMessage.create({
+            data: {
+                conversationId: conversation.id,
+                role: 'assistant',
+                content: reply
+            }
+        })
+
+        return NextResponse.json({ reply, conversationId: conversation.id })
     } catch (error: any) {
-        console.error('Chat API error:', {
-            name: error.name,
-            message: error.message,
-            code: error.code || 'unknown',
-            type: error.type || 'unknown',
-            response: error.response?.data || 'no response data'
-        });
+        console.error('Chat API error:', error.message)
         return NextResponse.json(
             { error: 'Failed to process chat message', details: error.message },
             { status: 500 }
