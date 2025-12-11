@@ -24,6 +24,7 @@ model User {
   city          String?
   region        String?
   lastLoginIp   String?
+  systemIp      String?
   lastLoginAt   DateTime?
   
   // Privacy & Terms Consent

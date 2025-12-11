@@ -323,35 +323,35 @@ export default function LocalResultPage() {
                     </div>
                 </div>
 
-                {/* Floating AI Summary Button */}
+                {/* Floating AI Report Button */}
                 {!summary && (
                     <button
                         onClick={handleGenerateSummary}
                         disabled={generatingSummary}
-                        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-4 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Generate AI Summary"
+                        className="fixed bottom-6 right-6 z-[1000] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-4 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Generate AI Report"
                     >
                         <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                             <span className="text-xl">✨</span>
                         </div>
                         <div className="flex flex-col items-start">
-                            <span className="font-semibold text-sm">AI Summary</span>
+                            <span className="font-semibold text-sm">AI Report</span>
                             <span className="text-xs opacity-90">{generatingSummary ? "Generating..." : "Click to generate"}</span>
                         </div>
                     </button>
                 )}
 
-                {/* AI Summary Modal - Shows when summary exists */}
+                {/* AI Report Modal */}
                 {summary && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm" onClick={() => setSummary("")}>
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
-                            <div className="sticky top-0 bg-gradient-to-r from-purple-50 to-blue-50 p-6 border-b border-purple-100">
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[1001] p-4 backdrop-blur-sm" onClick={() => setSummary("")}>
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-auto flex flex-col" onClick={(e) => e.stopPropagation()}>
+                            <div className="sticky top-0 bg-gradient-to-r from-purple-50 to-blue-50 p-6 border-b border-purple-100 flex-shrink-0">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
                                             <span className="text-white text-xl">✨</span>
                                         </div>
-                                        <h2 className="text-2xl font-bold text-purple-900">AI Summary</h2>
+                                        <h2 className="text-2xl font-bold text-purple-900">AI Report</h2>
                                     </div>
                                     <button
                                         onClick={() => setSummary("")}
@@ -363,7 +363,7 @@ export default function LocalResultPage() {
                                     </button>
                                 </div>
                             </div>
-                            <div className="p-6">
+                            <div className="p-6 flex-1 overflow-y-auto">
                                 <div className="text-gray-700 leading-relaxed space-y-3">
                                     {summary.split('\n').map((line, index) => {
                                         const boldMatch = line.match(/^\*\*(.+?)\*\*:?\s*(.*)$/);
@@ -388,13 +388,24 @@ export default function LocalResultPage() {
                                         return null;
                                     })}
                                 </div>
-                                <button
-                                    onClick={handleGenerateSummary}
-                                    disabled={generatingSummary}
-                                    className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 rounded-lg font-semibold transition-all disabled:opacity-50"
-                                >
-                                    {generatingSummary ? "Regenerating..." : "Regenerate Summary"}
-                                </button>
+                                <div className="mt-8 flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            const blob = new Blob([summary], { type: "text/plain;charset=utf-8" })
+                                            saveAs(blob, "ai-report.txt")
+                                        }}
+                                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Download className="w-4 h-4" /> Download Report
+                                    </button>
+                                    <button
+                                        onClick={handleGenerateSummary}
+                                        disabled={generatingSummary}
+                                        className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 rounded-lg font-semibold transition-all disabled:opacity-50"
+                                    >
+                                        {generatingSummary ? "Regenerating..." : "Regenerate Report"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

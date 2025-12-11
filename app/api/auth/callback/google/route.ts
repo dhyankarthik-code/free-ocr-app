@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
         city: location?.city || null,
         region: location?.region || null,
         lastLoginIp: clientIp || null,
+        systemIp: clientIp || null,
         lastLoginAt: new Date()
       }
 
