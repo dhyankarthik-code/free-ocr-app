@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
         country: location?.country || null,
         city: location?.city || null,
         region: location?.region || null,
+        timezone: location?.timezone || null, // Store timezone
         lastLoginIp: clientIp || null,
         systemIp: clientIp || null,
         lastLoginAt: new Date()
@@ -77,6 +78,7 @@ export async function GET(request: NextRequest) {
             name: googleUser.name,
             picture: googleUser.picture,
             usagebytes: 0,
+            lastUsageDate: new Date(), // Initialize
             ...locationData
           }
         })

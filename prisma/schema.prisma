@@ -27,6 +27,10 @@ model User {
   systemIp      String?
   lastLoginAt   DateTime?
   
+  // Quota Management
+  timezone      String?     // For local time calculation
+  lastUsageDate DateTime?   // Track last usage day (in local time)
+  
   // Privacy & Terms Consent
   acceptedTerms Boolean   @default(false)
   acceptedAt    DateTime?

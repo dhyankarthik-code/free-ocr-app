@@ -169,11 +169,46 @@ export async function POST(request: NextRequest) {
 
                 if (user) {
                     const currentUsageMB = (user.usagebytes || 0) / (1024 * 1024)
+                    const userTimezone = user.timezone || 'UTC'
 
-                    if (currentUsageMB + fileSizeMB > FILE_SIZE_LIMIT_MB) {
+                    // Check if usage needs to be reset (Daily reset at 00:00 User Time)
+                    const now = new Date()
+                    let todayString = now.toISOString().split('T')[0] // Default UTC
+
+                    try {
+                        // Get "today" in user's timezone
+                        todayString = new Date(now.toLocaleString('en-US', { timeZone: userTimezone })).toISOString().split('T')[0]
+                    } catch (e) {
+                        // Fallback to UTC if timezone is invalid
+                    }
+
+                    const lastUsageString = user.lastUsageDate ? user.lastUsageDate.toISOString().split('T')[0] : null
+
+                    // If it's a new day for the user, reset quota
+                    if (lastUsageString !== todayString) {
+                        await prisma.user.update({
+                            where: { id: user.id },
+                            data: {
+                                usagebytes: 0,
+                                lastUsageDate: new Date() // Store as UTC, but logic compares string date
+                            }
+                        })
+                        // Reset locally for current check
+                        user.usagebytes = 0
+                    } else {
+                        // Same day, just update timestamp
+                        await prisma.user.update({
+                            where: { id: user.id },
+                            data: { lastUsageDate: new Date() }
+                        })
+                    }
+
+                    const updatedUsageMB = (user.usagebytes || 0) / (1024 * 1024)
+
+                    if (updatedUsageMB + fileSizeMB > FILE_SIZE_LIMIT_MB) {
                         return NextResponse.json({
-                            error: 'Quota exceeded',
-                            details: `You have reached the 10MB lifetime upload limit. Used: ${currentUsageMB.toFixed(2)}MB`
+                            error: 'Daily Quota exceeded',
+                            details: `You have reached the 10MB daily upload limit. Resets at 00:00 (${userTimezone}). Used: ${updatedUsageMB.toFixed(2)}MB`
                         }, { status: 403 });
                     }
                 }

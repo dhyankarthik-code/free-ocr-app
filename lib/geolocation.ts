@@ -7,6 +7,7 @@ export interface GeoLocation {
     country: string | null
     city: string | null
     region: string | null
+    timezone: string | null
     ip: string | null
 }
 
@@ -18,6 +19,7 @@ export async function getLocationFromIp(ip: string): Promise<GeoLocation> {
         country: null,
         city: null,
         region: null,
+        timezone: null, // Default to null (will fallback to UTC)
         ip: ip || null
     }
 
@@ -27,7 +29,7 @@ export async function getLocationFromIp(ip: string): Promise<GeoLocation> {
     }
 
     try {
-        const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,city,regionName`, {
+        const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,city,regionName,timezone`, {
             next: { revalidate: 3600 } // Cache for 1 hour
         })
 
@@ -43,6 +45,7 @@ export async function getLocationFromIp(ip: string): Promise<GeoLocation> {
                 country: data.country || null,
                 city: data.city || null,
                 region: data.regionName || null,
+                timezone: data.timezone || null,
                 ip: ip
             }
         }
