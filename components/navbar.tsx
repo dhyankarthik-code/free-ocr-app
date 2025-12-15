@@ -38,6 +38,7 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
   const navLinks = [
     { label: 'About Us', href: '/about' },
     { label: 'OCR', href: '/' },
+    { label: 'Blog', href: '/blog' },
 
   ]
 
