@@ -30,5 +30,6 @@ export const config = {
     // - _next/static (static files)
     // - _next/image (image optimization files)
     // - favicon.ico (favicon file)
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+    // - googled9dde47a61914ba1.html (Google verification)
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|googled9dde47a61914ba1.html).*)'],
 }
