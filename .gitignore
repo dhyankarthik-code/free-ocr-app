@@ -37,3 +37,19 @@ next-env.d.ts
 pnpm-lock.yaml
 
 /lib/generated/prisma
+
+# OCR Weights & Fine-tuning
+**/weights/
+**/models/
+*weights*
+*finetun*
+*.pth
+*.bin
+*.ckpt
+*.h5
+*.onnx
+*.pb
+
+# Environment
+.env.production
+.env.local

@@ -1,0 +1,14 @@
+# Infy Galaxy - Free OCR Tool
+
+Free, high-accuracy OCR for converting images and PDFs to text.
+
+## Core Pages
+- [OCR Tool](https://www.ocr-extraction.com/): The main extraction interface.
+- [Blog](https://www.ocr-extraction.com/blog): Articles and updates on OCR technology.
+- [About Us](https://www.ocr-extraction.com/about): Our mission and technology stack.
+
+## Technical Details
+- **Max File Size**: 10MB total daily quota for users.
+- **Supported Formats**: PDF, PNG, JPG, JPEG, WEBP.
+- **Processing Engine**: Mistral AI (PDFs) and Google Cloud Vision (Images).
+- **Hosting**: Migrating to Hostinger for improved performance and scalability.
