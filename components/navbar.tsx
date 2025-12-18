@@ -8,7 +8,7 @@ import { Menu, X } from "lucide-react"
 
 interface NavbarProps {
   session?: Session | null
-  onLogout: () => void
+  onLogout?: () => void
   onLoginClick?: () => void
 }
 
@@ -78,7 +78,7 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
                 {session.name?.split(' ')[0] || 'User'}
               </span>
               <InteractiveHoverButton
-                onClick={onLogout}
+                onClick={() => onLogout?.()}
                 text="Logout"
                 className="px-4 py-1.5 text-sm h-8"
               />
@@ -131,7 +131,7 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
                   <span className="font-medium text-gray-700">{session.name || 'User'}</span>
                 </div>
                 <InteractiveHoverButton
-                  onClick={() => { onLogout(); setMobileMenuOpen(false); }}
+                  onClick={() => { onLogout?.(); setMobileMenuOpen(false); }}
                   text="Logout"
                   className="w-full text-center"
                 />
