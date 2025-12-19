@@ -1,5 +1,4 @@
 /** @type {import('next').NextConfig} */
-// Force rebuild to clear stale Hostinger cache - purge-1
 const nextConfig = {
   // Build-time env injection - bypasses Hostinger's runtime env limitation
   env: {
