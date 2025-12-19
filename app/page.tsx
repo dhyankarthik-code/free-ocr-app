@@ -315,7 +315,7 @@ export default function Home() {
             </h2>
             <div className="mt-8 text-center text-sm text-gray-500">
               <p>© {new Date().getFullYear()} Free OCR Tool. All rights reserved.</p>
-              <p className="text-xs mt-2 opacity-50">v2.0.1 (Debug: {new Date().toISOString()})</p>
+              <p className="text-xs mt-2 opacity-50">v2.0.2 (Debug: Static Build)</p>
             </div>
             <p className="text-xl md:text-2xl font-semibold text-gray-700 mb-6">
               The World's "Most Accurate OCR" Tool for Free
