@@ -37,7 +37,11 @@ function isValidOCROutput(text: string): boolean {
 async function performOCR(base64Image: string, dataUrl: string, mistralKey?: string, googleKey?: string) {
     let rawText = '';
     let usedMethod = '';
-    let processingError = null;
+    const errors: string[] = [];
+    let mistralError: any = null;
+    let googleError: any = null;
+
+    console.log(`[OCR Debug] Mistral key present: ${!!mistralKey}, Google key present: ${!!googleKey}`);
 
     // Try Mistral first
     if (mistralKey) {
@@ -60,53 +64,73 @@ async function performOCR(base64Image: string, dataUrl: string, mistralKey?: str
             } else {
                 throw new Error("Mistral response contained no pages");
             }
-        } catch (mistralError: any) {
-            console.error("⚠️ Mistral OCR failed:", mistralError.message);
-            processingError = mistralError;
+        } catch (error: any) {
+            console.error("⚠️ Mistral OCR failed:", error.message);
+            mistralError = error;
+            errors.push(`Mistral: ${error.message}`);
         }
+    } else {
+        console.log('⚠️ Mistral API key not configured');
+        errors.push('Mistral: API key not configured');
     }
 
     // Fallback to Google Vision
-    if (!rawText && googleKey) {
-        try {
-            console.log('Falling back to Google Cloud Vision API...');
+    if (!rawText) {
+        if (googleKey) {
+            try {
+                console.log('Falling back to Google Cloud Vision API...');
 
-            const visionResponse = await fetch(
-                `https://vision.googleapis.com/v1/images:annotate?key=${googleKey}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        requests: [{
-                            image: { content: base64Image },
-                            features: [{ type: 'TEXT_DETECTION' }]
-                        }]
-                    })
+                const visionResponse = await fetch(
+                    `https://vision.googleapis.com/v1/images:annotate?key=${googleKey}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            requests: [{
+                                image: { content: base64Image },
+                                features: [{ type: 'TEXT_DETECTION' }]
+                            }]
+                        })
+                    }
+                );
+
+                const visionData = await visionResponse.json();
+
+                if (visionData.error) {
+                    throw new Error(`Google Vision API Error: ${visionData.error.message}`);
                 }
-            );
 
-            const visionData = await visionResponse.json();
+                if (visionData.responses?.[0]?.textAnnotations?.[0]?.description) {
+                    rawText = visionData.responses[0].textAnnotations[0].description;
+                    usedMethod = 'google_vision';
+                    console.log('✅ Google Vision success!');
+                } else {
+                    throw new Error("Google Vision found no text");
+                }
 
-            if (visionData.error) {
-                throw new Error(`Google Vision API Error: ${visionData.error.message}`);
+            } catch (error: any) {
+                console.error("❌ Google Vision failed:", error.message);
+                googleError = error;
+                errors.push(`Google: ${error.message}`);
             }
-
-            if (visionData.responses?.[0]?.textAnnotations?.[0]?.description) {
-                rawText = visionData.responses[0].textAnnotations[0].description;
-                usedMethod = 'google_vision';
-                console.log('✅ Google Vision success!');
-            } else {
-                throw new Error("Google Vision found no text");
-            }
-
-        } catch (googleError: any) {
-            console.error("❌ Google Vision failed:", googleError.message);
-            throw new Error(`Both OCR engines failed. Mistral: ${processingError?.message || 'N/A'}, Google: ${googleError.message}`);
+        } else {
+            console.log('⚠️ Google API key not configured');
+            errors.push('Google: API key not configured');
         }
     }
 
     if (!rawText) {
-        throw new Error('No OCR engine available or all engines failed');
+        // Construct detailed error message
+        const errorMessage = `OCR failed. ${errors.join(' | ')}`;
+        const error: any = new Error(errorMessage);
+        // Attach debug info to the error object so it can be sent to client
+        error.debug = {
+            mistralKeyConfigured: !!mistralKey,
+            googleKeyConfigured: !!googleKey,
+            mistralError: mistralError?.message,
+            googleError: googleError?.message
+        };
+        throw error;
     }
 
     return { rawText, usedMethod };
