@@ -34,9 +34,9 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/blog" className="hover:text-red-500 transition-colors">
+                                <a href="https://blog.ocr-extraction.com" className="hover:text-red-500 transition-colors" target="_blank" rel="noopener noreferrer">
                                     Blog
-                                </Link>
+                                </a>
                             </li>
 
                         </ul>
