@@ -14,26 +14,6 @@ interface NavbarProps {
 
 export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isVisible, setIsVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-
-      // Hide when scrolling down given threshold, show when scrolling up
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false)
-      } else {
-        setIsVisible(true)
-      }
-
-      setLastScrollY(currentScrollY)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [lastScrollY])
 
   const navLinks = [
     { label: 'About Us', href: '/about' },
@@ -43,10 +23,10 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
   ]
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-[100] bg-white border-b border-gray-100 shadow-sm h-16 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+    <nav className="fixed top-0 left-0 right-0 z-[100] bg-white border-b border-gray-100 shadow-sm h-16">
       <div className="container mx-auto px-4 h-full flex items-center justify-between relative">
         {/* Logo */}
-        <Link href="/" className="text-[20px] font-bold text-red-500 hover:text-red-600 transition-colors z-10">
+        <Link href="/" className="text-3xl font-bold text-red-500 hover:text-red-600 transition-colors z-10">
           Infy Galaxy
         </Link>
 
