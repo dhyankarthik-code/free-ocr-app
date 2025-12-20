@@ -22,7 +22,8 @@ interface BlogPost {
 // Fetch single post
 async function getPost(slug: string): Promise<BlogPost | null> {
     try {
-        const res = await fetch(`https://public-api.wordpress.com/rest/v1.1/sites/234686689/posts/slug:${slug}`, {
+        const siteId = process.env.WORDPRESS_SITE_ID || '234686689'
+        const res = await fetch(`https://public-api.wordpress.com/rest/v1.1/sites/${siteId}/posts/slug:${slug}`, {
             next: { revalidate: 3600 }
         })
         const data = await res.json()

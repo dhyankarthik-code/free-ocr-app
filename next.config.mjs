@@ -45,14 +45,6 @@ const nextConfig = {
       }
     ]
   },
-  async rewrites() {
-    return [
-      {
-        source: '/blog/:path*',
-        destination: 'https://dhyanvritk.wordpress.com/:path*',
-      },
-    ]
-  },
 }
 
 export default nextConfig
