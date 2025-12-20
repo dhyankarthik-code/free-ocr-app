@@ -45,6 +45,18 @@ const nextConfig = {
       }
     ]
   },
+  async rewrites() {
+    return [
+      {
+        source: '/blog',
+        destination: 'http://145.79.28.90/blog',
+      },
+      {
+        source: '/blog/:path*',
+        destination: 'http://145.79.28.90/blog/:path*',
+      },
+    ]
+  },
 }
 
 export default nextConfig
