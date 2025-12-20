@@ -47,12 +47,19 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
         <div className="hidden md:flex items-center gap-4 z-10">
           {session ? (
             <div className="flex items-center gap-3">
-              {session.picture && (
+              {session.picture ? (
                 <img
                   src={session.picture}
                   alt="Profile"
-                  className="w-8 h-8 rounded-full border-2 border-red-500"
+                  className="w-8 h-8 rounded-full border-2 border-red-500 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(session.name || 'User')}&background=ef4444&color=fff&size=32`;
+                  }}
                 />
+              ) : (
+                <div className="w-8 h-8 rounded-full border-2 border-red-500 bg-red-500 flex items-center justify-center text-white text-sm font-bold">
+                  {(session.name || 'U').charAt(0).toUpperCase()}
+                </div>
               )}
               <span className="text-sm font-medium text-gray-700">
                 {session.name?.split(' ')[0] || 'User'}
@@ -105,8 +112,19 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
             {session ? (
               <>
                 <div className="flex items-center gap-3 mb-2">
-                  {session.picture && (
-                    <img src={session.picture} alt="Profile" className="w-8 h-8 rounded-full" />
+                  {session.picture ? (
+                    <img
+                      src={session.picture}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(session.name || 'User')}&background=ef4444&color=fff&size=32`;
+                      }}
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white text-sm font-bold">
+                      {(session.name || 'U').charAt(0).toUpperCase()}
+                    </div>
                   )}
                   <span className="font-medium text-gray-700">{session.name || 'User'}</span>
                 </div>
