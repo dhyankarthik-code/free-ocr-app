@@ -32,6 +32,8 @@ export default function LocalResultPage() {
     const [isBatch, setIsBatch] = useState(false)
     const [pages, setPages] = useState<Array<{ pageNumber: number, text: string, imageName?: string }>>([])
     const [currentPage, setCurrentPage] = useState(1)
+    const [fileName, setFileName] = useState<string>("document")
+    const [reportFormatModal, setReportFormatModal] = useState(false)
 
     useEffect(() => {
         const storedData = sessionStorage.getItem("ocr_result")
@@ -41,22 +43,24 @@ export default function LocalResultPage() {
         }
 
         try {
-            // Try to parse as JSON (PDF/batch result)
             const parsed = JSON.parse(storedData)
+            const baseName = parsed.fileName?.split('.').slice(0, -1).join('.') || "document"
+            setFileName(baseName)
+
             if ((parsed.isPDF || parsed.isBatch) && parsed.pages) {
                 setIsMultiPage(true)
                 setIsBatch(parsed.isBatch === true)
                 setPages(parsed.pages)
                 setCurrentPage(1)
-                // Set text to first page for initial display
                 setText(parsed.pages[0]?.text || "")
+            } else if (parsed.text) {
+                setText(parsed.text)
             } else if (typeof parsed === 'string') {
                 setText(parsed)
             } else {
                 setText(storedData)
             }
         } catch {
-            // Not JSON, treat as plain text
             setText(storedData)
         }
         setLoading(false)
@@ -105,7 +109,7 @@ export default function LocalResultPage() {
 
     const handleDownloadTxt = () => {
         const blob = new Blob([text], { type: "text/plain;charset=utf-8" })
-        saveAs(blob, "ocr-result.txt")
+        saveAs(blob, `${fileName} ocr result.txt`)
     }
 
     const handleDownloadDocx = async () => {
@@ -116,30 +120,47 @@ export default function LocalResultPage() {
             }],
         })
         const blob = await Packer.toBlob(doc)
-        saveAs(blob, "ocr-result.docx")
+        saveAs(blob, `${fileName} ocr result.docx`)
     }
 
     const handleDownloadPdf = async () => {
         const pdfDoc = await PDFDocument.create()
         const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
-        const pages = pdfDoc.addPage()
-        const { width, height } = pages.getSize()
+        const pdfPage = pdfDoc.addPage()
+        const { width, height } = pdfPage.getSize()
         const fontSize = 12
         const lines = text.split('\n')
         let y = height - 4 * fontSize
-        let currentPage = pages
+        let activePdfPage = pdfPage
 
         for (const line of lines) {
             if (y < 40) {
-                currentPage = pdfDoc.addPage()
+                activePdfPage = pdfDoc.addPage()
                 y = height - 4 * fontSize
             }
-            currentPage.drawText(line, { x: 50, y, size: fontSize, font: timesRomanFont, color: rgb(0, 0, 0) })
+            activePdfPage.drawText(line, { x: 50, y, size: fontSize, font: timesRomanFont, color: rgb(0, 0, 0) })
             y -= fontSize + 2
         }
         const pdfBytes = await pdfDoc.save()
         const blob = new Blob([pdfBytes as any], { type: "application/pdf" })
-        saveAs(blob, "ocr-result.pdf")
+        saveAs(blob, `${fileName} ocr result.pdf`)
+    }
+
+    const handleDownloadReport = async (format: 'txt' | 'docx') => {
+        if (format === 'txt') {
+            const blob = new Blob([summary], { type: "text/plain;charset=utf-8" })
+            saveAs(blob, `${fileName} ocr result.txt`)
+        } else {
+            const doc = new Document({
+                sections: [{
+                    properties: {},
+                    children: summary.split("\n").map(line => new Paragraph({ children: [new TextRun(line)] })),
+                }],
+            })
+            const blob = await Packer.toBlob(doc)
+            saveAs(blob, `${fileName} ocr result.docx`)
+        }
+        setReportFormatModal(false)
     }
 
     const handleGenerateSummary = async () => {
@@ -388,23 +409,48 @@ export default function LocalResultPage() {
                                         return null;
                                     })}
                                 </div>
-                                <div className="mt-8 flex gap-3">
-                                    <button
-                                        onClick={() => {
-                                            const blob = new Blob([summary], { type: "text/plain;charset=utf-8" })
-                                            saveAs(blob, "ai-report.txt")
-                                        }}
-                                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <Download className="w-4 h-4" /> Download Report
-                                    </button>
-                                    <button
-                                        onClick={handleGenerateSummary}
-                                        disabled={generatingSummary}
-                                        className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 rounded-lg font-semibold transition-all disabled:opacity-50"
-                                    >
-                                        {generatingSummary ? "Regenerating..." : "Regenerate Report"}
-                                    </button>
+                                <div className="mt-8 flex flex-col gap-4">
+                                    {!reportFormatModal ? (
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setReportFormatModal(true)}
+                                                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Download className="w-4 h-4" /> Download Report
+                                            </button>
+                                            <button
+                                                onClick={handleGenerateSummary}
+                                                disabled={generatingSummary}
+                                                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold transition-all disabled:opacity-50"
+                                            >
+                                                {generatingSummary ? "Regenerating..." : "Regenerate"}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 animate-in fade-in zoom-in-95 duration-200">
+                                            <p className="text-sm font-bold text-purple-900 mb-3 text-center">Select Download Format</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button
+                                                    onClick={() => handleDownloadReport('txt')}
+                                                    className="bg-white hover:bg-purple-100 text-purple-700 border border-purple-200 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <FileText className="w-4 h-4" /> Text File (.txt)
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDownloadReport('docx')}
+                                                    className="bg-white hover:bg-purple-100 text-blue-700 border border-blue-200 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <FileText className="w-4 h-4" /> Word Doc (.docx)
+                                                </button>
+                                            </div>
+                                            <button
+                                                onClick={() => setReportFormatModal(false)}
+                                                className="w-full mt-3 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

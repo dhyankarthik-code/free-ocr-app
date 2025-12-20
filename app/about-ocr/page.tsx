@@ -83,11 +83,68 @@ export default function AboutOCRPage() {
                         </div>
                     </div>
 
-                    <div className="mt-12 space-y-6">
-                        <h2 className="text-2xl font-bold text-gray-900">Why This Process Is So Fast and Accurate</h2>
+                    <div className="mt-12 space-y-8">
+                        <h2 className="text-2xl font-bold text-gray-900 border-b pb-2">The Engine Behind the Accuracy</h2>
                         <p className="text-gray-700">
-                            Infy Galaxy OCR uses cutting-edge AI and Vision-LLM technology. This allows it to read text with high accuracy and handle everything from handwriting to scanned PDFs due to which the the extracted text is clean and clear and ease of use.
+                            At its core, Infy Galaxy OCR utilizes a multi-layered approach to Optical Character Recognition. Unlike traditional tools that rely solely on pattern matching, our platform integrates <strong>Vision Large Language Models (VLMs)</strong>. This means the system doesn't just "see" shapes; it "understands" the context of the document.
                         </p>
+                        <p className="text-gray-700">
+                            By leveraging advanced AI models and tailored deep-learning algorithms, we achieve high accuracy even on challenging inputs like low-resolution scans, handwritten notes, and skewed images. This semantic understanding allows the tool to correct common OCR errors based on the surrounding sentence structure.
+                        </p>
+                    </div>
+
+                    <div className="mt-12 space-y-8">
+                        <h2 className="text-2xl font-bold text-gray-900 border-b pb-2">Step-by-Step Processing Pipeline</h2>
+
+                        <div className="space-y-6">
+                            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 mb-3">1. Intelligent Pre-processing</h3>
+                                <p className="text-gray-700">
+                                    Before recognition begins, your image undergoes optimization:
+                                </p>
+                                <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-700 text-sm">
+                                    <li><strong>Binarization:</strong> Isolating text from noisy backgrounds for clean recognition.</li>
+                                    <li><strong>Contrast Normalization:</strong> Adjusting lighting imbalances common in mobile photos.</li>
+                                    <li><strong>Skew Correction:</strong> Automatically straightening documents scanned at an angle.</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 mb-3">2. Text Detection & Segmentation</h3>
+                                <p className="text-gray-700">
+                                    The AI identifies "Regions of Interest" (ROI), distinguishing between headers, paragraphs, and tables. This spatial awareness ensures that the layout is preserved when you export results.
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 mb-3">3. Contextual Recognition</h3>
+                                <p className="text-gray-700">
+                                    The core engine extracts characters while the LLM layer reviews the output. This dual-pass system allows the system to probabilistically correct characters based on the surrounding words—the reason why our handwriting recognition is so effective.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-12 space-y-6">
+                        <h2 className="text-2xl font-bold text-gray-900 border-b pb-2">Data Safety & Privacy Architecture</h2>
+                        <p className="text-gray-700">
+                            We operate on a <strong>"Strictly Ephemeral"</strong> data policy to ensure your documents remain private:
+                        </p>
+                        <ul className="list-disc pl-6 space-y-3 text-gray-700">
+                            <li><strong>Encryption:</strong> All uploads are encrypted via SSL/TLS (HTTPS) during transit.</li>
+                            <li><strong>Memory-Only Processing:</strong> Files are processed in secure, isolated memory containers.</li>
+                            <li><strong>Instant Deletion:</strong> Once text is extracted, the original file and the extracted data are permanently erased. We do not store, index, or learn from your private documents.</li>
+                        </ul>
+                    </div>
+
+                    <div className="mt-12 bg-red-50 p-8 rounded-2xl border border-red-100 text-center">
+                        <h2 className="text-2xl font-bold text-red-900 mb-4">Start Your First Extraction</h2>
+                        <p className="text-red-800 mb-6">
+                            Experience the power of AI-driven OCR with Infy Galaxy. Fast, secure, and completely free.
+                        </p>
+                        <a href="/" className="inline-block bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg hover:shadow-red-200">
+                            Go to OCR Tool
+                        </a>
                     </div>
 
                 </article>

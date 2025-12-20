@@ -81,7 +81,7 @@ export default function Home() {
         console.log(`PDF processed: ${data.totalPages} pages`)
         setProcessingSteps(prev => [...prev, "Finalizing PDF results..."])
         setProgress(100)
-        sessionStorage.setItem("ocr_result", JSON.stringify(data))
+        sessionStorage.setItem("ocr_result", JSON.stringify({ ...data, fileName: file.name }))
 
         await new Promise(r => setTimeout(r, 500))
         console.log('Redirecting to results page...')
@@ -99,7 +99,7 @@ export default function Home() {
 
       setProcessingSteps(prev => [...prev, "Finalizing results..."])
       setProgress(100)
-      sessionStorage.setItem("ocr_result", text)
+      sessionStorage.setItem("ocr_result", JSON.stringify({ text, fileName: file.name }))
 
       // Small delay before redirect
       await new Promise(r => setTimeout(r, 500))
@@ -233,6 +233,7 @@ export default function Home() {
         sessionStorage.setItem("ocr_result", JSON.stringify({
           isPDF: false,
           isBatch: true,
+          fileName: imageFiles[0].name, // Use first image name as reference
           pages: pageResults,
           totalPages: pageResults.length
         }))
@@ -263,6 +264,10 @@ export default function Home() {
       <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-8">
         <div className="w-full max-w-2xl">
           <div className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 text-center text-balance min-h-[4rem] flex items-center justify-center">
+            {/* SEO H1 (Visually Hidden but accessible to crawlers) */}
+            <h1 className="sr-only">
+              Free OCR to Text - Convert Image and PDF to Text with 100% Accuracy
+            </h1>
             <TextType
               text={["Free OCR Extraction tool", "and Report Generation Tool", "Free OCR Extraction tool and Report Generation Tool"]}
               typingSpeed={50}

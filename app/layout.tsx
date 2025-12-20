@@ -11,21 +11,34 @@ const geist = Geist({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: {
-    default: "Most Accurate OCR to Text | Convert Image to Text | Free OCR Image Conversion",
-    template: "%s | Most Accurate OCR to Text"
+    default: "Free OCR to Text | Convert Image to Text & Excel | 100% Accurate",
+    template: "%s | Free OCR Extraction"
   },
-  description: "Convert images and PDFs to text instantly with 99%+ accuracy. Best Free Online OCR tool for students & professionals. Supports handwriting, tables, and multi-language extraction. No sign-up required.",
-  keywords: ["free ocr", "image to text", "pdf to text", "online ocr", "ai ocr", "extract text from image", "ocr to excel", "handwriting recognition", "best free ocr", "ocr unlimited", "text scanner online"],
+  description: "Best Free OCR tool to convert images, PDFs, and screenshots to editable text or Excel. Supports handwriting recognition, batch processing, and multi-language extraction. No sign-up needed.",
+  keywords: [
+    "free ocr",
+    "image to text",
+    "pdf to text",
+    "online ocr",
+    "ai ocr",
+    "extract text from image",
+    "ocr to excel",
+    "handwriting recognition",
+    "batch image to text",
+    "scanned document to text",
+    "convert screenshot to text",
+    "text scanner online"
+  ],
   authors: [{ name: "Infy Galaxy Team" }],
   creator: "Infy Galaxy",
   publisher: "Infy Galaxy",
   metadataBase: new URL('https://www.ocr-extraction.com'),
   alternates: {
-    canonical: '/',
+    canonical: './', // Self-referencing canonical
   },
   openGraph: {
-    title: "Free OCR to Text | Best AI Image to Text Converter",
-    description: "Convert images to text, PDF, and Excel for free. No limits, 100% accurate AI extraction. Try the best OCR tool online today.",
+    title: "Free OCR to Text | Convert Image/PDF to Text & Excel",
+    description: "Convert images to text, PDF, and Excel for free. No limits, 100% accurate AI extraction (Mistral/VLM). Try the best OCR tool online today.",
     type: 'website',
     url: 'https://www.ocr-extraction.com/',
     images: [

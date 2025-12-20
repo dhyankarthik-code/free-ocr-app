@@ -24,18 +24,45 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  async redirects() {
+  async headers() {
     return [
       {
         source: '/:path*',
-        has: [
+        headers: [
           {
-            type: 'host',
-            value: 'ocr-extraction.com',
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
           },
-        ],
-        destination: 'https://www.ocr-extraction.com/:path*',
-        permanent: true,
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin'
+          },
+          // CSP - Relaxed for Google Analytics/GTM/Vercel
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://www.google-analytics.com https://*.google.com; font-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://vitals.vercel-insights.com;"
+          }
+        ]
+      }
+    ]
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/blog/:path*',
+        destination: 'https://dhyanvritk.wordpress.com/:path*',
       },
     ]
   },

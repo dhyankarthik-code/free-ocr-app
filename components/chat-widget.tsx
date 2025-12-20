@@ -149,8 +149,17 @@ export default function ChatWidget() {
                 body: JSON.stringify({
                     message: newUserMessage.text,
                     sessionId,
-                    documentText: localStorage.getItem('extractedText') || "No document text available yet.",
-                    chatHistory: messages.slice(1).map(m => ({
+                    documentText: (() => {
+                        const stored = sessionStorage.getItem('ocr_result');
+                        if (!stored) return "No document text available yet.";
+                        try {
+                            const parsed = JSON.parse(stored);
+                            return parsed.pages ? parsed.pages.map((p: any) => p.text).join('\n\n') : (parsed.text || stored);
+                        } catch {
+                            return stored;
+                        }
+                    })(),
+                    chatHistory: messages.map(m => ({
                         role: m.sender === 'user' ? 'user' : 'assistant',
                         content: m.text
                     }))
@@ -214,21 +223,45 @@ export default function ChatWidget() {
 
                     {/* Messages Area */}
                     <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col gap-4">
-                        {messages.map((msg) => (
-                            <div
-                                key={msg.id}
-                                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
+                        {messages.map((msg) => {
+                            const renderMarkdown = (text: string) => {
+                                // Basic regex markdown parser
+                                let html = text
+                                    // Bold
+                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                    // Italic
+                                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                    // Lists
+                                    .replace(/^\s*-\s+(.*)$/gm, '<li>$1</li>')
+                                    .replace(/((?:<li>.*?<\/li>\s*)+)/g, '<ul class="list-disc pl-4 my-2">$1</ul>')
+                                    // Newlines
+                                    .replace(/\n/g, '<br />');
+                                return html;
+                            };
+
+                            return (
                                 <div
-                                    className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.sender === 'user'
-                                        ? 'bg-red-600 text-white rounded-tr-none'
-                                        : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'
-                                        }`}
+                                    key={msg.id}
+                                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
-                                    {msg.text}
+                                    <div
+                                        className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.sender === 'user'
+                                            ? 'bg-red-600 text-white rounded-tr-none'
+                                            : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none font-sans'
+                                            }`}
+                                    >
+                                        {msg.sender === 'bot' ? (
+                                            <div
+                                                className="prose prose-sm max-w-none"
+                                                dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }}
+                                            />
+                                        ) : (
+                                            msg.text
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         <div ref={messagesEndRef} />
                     </div>
 

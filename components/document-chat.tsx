@@ -225,6 +225,21 @@ export default function DocumentChat({ documentText }: DocumentChatProps) {
 
                         {messages.map((msg, idx) => {
                             const isMe = msg.role === 'user';
+                            const renderMarkdown = (text: string) => {
+                                // Basic regex markdown parser
+                                let html = text
+                                    // Bold
+                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                    // Italic
+                                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                    // Lists
+                                    .replace(/^\s*-\s+(.*)$/gm, '<li>$1</li>')
+                                    .replace(/((?:<li>.*?<\/li>\s*)+)/g, '<ul class="list-disc pl-4 my-2">$1</ul>')
+                                    // Newlines
+                                    .replace(/\n/g, '<br />');
+                                return html;
+                            };
+
                             return (
                                 <div
                                     className={cn(
@@ -258,10 +273,17 @@ export default function DocumentChat({ documentText }: DocumentChatProps) {
                                                     "rounded-2xl px-4 py-2.5 text-sm shadow-sm",
                                                     isMe
                                                         ? "bg-primary text-primary-foreground rounded-tr-sm"
-                                                        : "bg-white border text-foreground rounded-tl-sm"
+                                                        : "bg-white border text-foreground rounded-tl-sm font-sans"
                                                 )}
                                             >
-                                                <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                                {!isMe ? (
+                                                    <div
+                                                        className="prose prose-sm max-w-none"
+                                                        dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                                                    />
+                                                ) : (
+                                                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                                )}
                                             </div>
                                             <div className={cn(
                                                 "mt-1 flex items-center gap-2",
