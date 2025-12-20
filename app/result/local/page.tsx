@@ -107,16 +107,31 @@ export default function LocalResultPage() {
         return () => clearTimeout(timeoutId)
     }, [searchTerm, text])
 
+    // Get full text from all pages for download
+    const getFullText = () => {
+        if (isMultiPage && pages.length > 0) {
+            return pages.map((page, idx) => {
+                const header = isBatch
+                    ? `--- Image ${idx + 1}: ${page.imageName || 'Untitled'} ---`
+                    : `--- Page ${idx + 1} ---`;
+                return `${header}\n\n${page.text}`;
+            }).join('\n\n');
+        }
+        return text;
+    };
+
     const handleDownloadTxt = () => {
-        const blob = new Blob([text], { type: "text/plain;charset=utf-8" })
+        const fullText = getFullText();
+        const blob = new Blob([fullText], { type: "text/plain;charset=utf-8" })
         saveAs(blob, `${fileName} ocr result.txt`)
     }
 
     const handleDownloadDocx = async () => {
+        const fullText = getFullText();
         const doc = new Document({
             sections: [{
                 properties: {},
-                children: text.split("\n").map(line => new Paragraph({ children: [new TextRun(line)] })),
+                children: fullText.split("\n").map(line => new Paragraph({ children: [new TextRun(line)] })),
             }],
         })
         const blob = await Packer.toBlob(doc)
@@ -126,23 +141,56 @@ export default function LocalResultPage() {
     const handleDownloadPdf = async () => {
         const pdfDoc = await PDFDocument.create()
         const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
-        const pdfPage = pdfDoc.addPage()
-        const { width, height } = pdfPage.getSize()
-        const fontSize = 12
-        const lines = text.split('\n')
-        let y = height - 4 * fontSize
-        let activePdfPage = pdfPage
+        const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
+        const { width, height } = pdfDoc.addPage().getSize()
+        pdfDoc.removePage(0) // Remove the blank page we used to get dimensions
 
-        for (const line of lines) {
-            if (y < 40) {
-                activePdfPage = pdfDoc.addPage()
-                y = height - 4 * fontSize
+        const fontSize = 12
+        const headerFontSize = 14
+
+        if (isMultiPage && pages.length > 0) {
+            // Create separate PDF page for each OCR page
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i];
+                let pdfPage = pdfDoc.addPage()
+                let y = height - 50
+
+                // Page header
+                const headerText = isBatch
+                    ? `Image ${i + 1}: ${page.imageName || 'Untitled'}`
+                    : `Page ${i + 1} of ${pages.length}`;
+                pdfPage.drawText(headerText, { x: 50, y, size: headerFontSize, font: boldFont, color: rgb(0.2, 0.2, 0.2) })
+                y -= headerFontSize + 10
+
+                // Page content
+                const lines = page.text.split('\n')
+                for (const line of lines) {
+                    if (y < 50) {
+                        pdfPage = pdfDoc.addPage()
+                        y = height - 50
+                    }
+                    pdfPage.drawText(line.substring(0, 100), { x: 50, y, size: fontSize, font: timesRomanFont, color: rgb(0, 0, 0) })
+                    y -= fontSize + 2
+                }
             }
-            activePdfPage.drawText(line, { x: 50, y, size: fontSize, font: timesRomanFont, color: rgb(0, 0, 0) })
-            y -= fontSize + 2
+        } else {
+            // Single page document
+            let pdfPage = pdfDoc.addPage()
+            let y = height - 50
+            const lines = text.split('\n')
+
+            for (const line of lines) {
+                if (y < 50) {
+                    pdfPage = pdfDoc.addPage()
+                    y = height - 50
+                }
+                pdfPage.drawText(line.substring(0, 100), { x: 50, y, size: fontSize, font: timesRomanFont, color: rgb(0, 0, 0) })
+                y -= fontSize + 2
+            }
         }
+
         const pdfBytes = await pdfDoc.save()
-        const blob = new Blob([pdfBytes as any], { type: "application/pdf" })
+        const blob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: "application/pdf" })
         saveAs(blob, `${fileName} ocr result.pdf`)
     }
 
