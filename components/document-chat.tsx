@@ -270,7 +270,7 @@ export default function DocumentChat({ documentText }: DocumentChatProps) {
                                         <div>
                                             <div
                                                 className={cn(
-                                                    "rounded-2xl px-4 py-2.5 text-sm shadow-sm",
+                                                    "rounded-2xl px-4 py-2.5 text-xs shadow-sm",
                                                     isMe
                                                         ? "bg-primary text-primary-foreground rounded-tr-sm"
                                                         : "bg-white border text-foreground rounded-tl-sm font-sans"
@@ -278,7 +278,7 @@ export default function DocumentChat({ documentText }: DocumentChatProps) {
                                             >
                                                 {!isMe ? (
                                                     <div
-                                                        className="prose prose-sm max-w-none"
+                                                        className="prose prose-sm max-w-none text-xs prose-p:my-1 prose-ul:my-1 prose-li:my-0.5"
                                                         dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
                                                     />
                                                 ) : (
@@ -333,7 +333,7 @@ export default function DocumentChat({ documentText }: DocumentChatProps) {
                             onKeyPress={handleKeyPress}
                             placeholder="Type your message..."
                             disabled={loading}
-                            className="pr-12 py-6 rounded-full bg-muted/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-primary/30"
+                            className="pr-12 py-3 rounded-full bg-muted/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-primary/30 text-xs"
                         />
                         <Button
                             onClick={handleSend}

@@ -146,11 +146,11 @@ export default function LocalResultPage() {
         saveAs(blob, `${fileName} ocr result.pdf`)
     }
 
-    const handleDownloadReport = async (format: 'txt' | 'docx') => {
+    const handleDownloadReport = async (format: 'txt' | 'docx' | 'pdf') => {
         if (format === 'txt') {
             const blob = new Blob([summary], { type: "text/plain;charset=utf-8" })
-            saveAs(blob, `${fileName} ocr result.txt`)
-        } else {
+            saveAs(blob, `${fileName} AI Report.txt`)
+        } else if (format === 'docx') {
             const doc = new Document({
                 sections: [{
                     properties: {},
@@ -158,7 +158,44 @@ export default function LocalResultPage() {
                 }],
             })
             const blob = await Packer.toBlob(doc)
-            saveAs(blob, `${fileName} ocr result.docx`)
+            saveAs(blob, `${fileName} AI Report.docx`)
+        } else if (format === 'pdf') {
+            const pdfDoc = await PDFDocument.create()
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+            const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+            let page = pdfDoc.addPage()
+            const { width, height } = page.getSize()
+            const fontSize = 11
+            const lineHeight = fontSize + 4
+            let y = height - 50
+
+            const lines = summary.split('\n')
+            for (const line of lines) {
+                if (y < 50) {
+                    page = pdfDoc.addPage()
+                    y = height - 50
+                }
+
+                const isBold = line.match(/^\*\*(.+?)\*\*:?/)
+                const text = isBold ? isBold[1] : line.replace(/^[•\-]\s*/, '')
+                const useFont = isBold ? boldFont : font
+                const useFontSize = isBold ? fontSize + 2 : fontSize
+
+                if (text.trim()) {
+                    page.drawText(text, {
+                        x: line.startsWith('-') || line.startsWith('•') ? 70 : 50,
+                        y,
+                        size: useFontSize,
+                        font: useFont,
+                        color: rgb(0, 0, 0)
+                    })
+                }
+                y -= lineHeight
+            }
+
+            const pdfBytes = await pdfDoc.save()
+            const blob = new Blob([pdfBytes], { type: "application/pdf" })
+            saveAs(blob, `${fileName} AI Report.pdf`)
         }
         setReportFormatModal(false)
     }
@@ -385,28 +422,28 @@ export default function LocalResultPage() {
                                 </div>
                             </div>
                             <div className="p-6 flex-1 overflow-y-auto">
-                                <div className="text-gray-700 leading-relaxed space-y-3">
+                                <div className="text-gray-700 leading-relaxed space-y-4">
                                     {summary.split('\n').map((line, index) => {
                                         const boldMatch = line.match(/^\*\*(.+?)\*\*:?\s*(.*)$/);
                                         if (boldMatch) {
                                             return (
-                                                <div key={index} className="mb-2">
-                                                    <h4 className="font-bold text-gray-900 mb-1">{boldMatch[1]}</h4>
-                                                    {boldMatch[2] && <p className="text-gray-700">{boldMatch[2]}</p>}
+                                                <div key={index} className="mb-3">
+                                                    <h4 className="font-bold text-gray-900 text-base mb-2">{boldMatch[1]}</h4>
+                                                    {boldMatch[2] && <p className="text-gray-700 text-sm leading-relaxed">{boldMatch[2]}</p>}
                                                 </div>
                                             );
                                         }
                                         if (line.trim().startsWith('-')) {
                                             return (
-                                                <p key={index} className="pl-4 text-gray-700">
+                                                <p key={index} className="pl-6 text-gray-700 text-sm leading-relaxed mb-2">
                                                     • {line.trim().substring(1).trim()}
                                                 </p>
                                             );
                                         }
                                         if (line.trim()) {
-                                            return <p key={index} className="text-gray-700">{line}</p>;
+                                            return <p key={index} className="text-gray-700 text-sm leading-relaxed mb-3">{line}</p>;
                                         }
-                                        return null;
+                                        return <div key={index} className="h-2"></div>;
                                     })}
                                 </div>
                                 <div className="mt-8 flex flex-col gap-4">
@@ -429,18 +466,24 @@ export default function LocalResultPage() {
                                     ) : (
                                         <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 animate-in fade-in zoom-in-95 duration-200">
                                             <p className="text-sm font-bold text-purple-900 mb-3 text-center">Select Download Format</p>
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="grid grid-cols-3 gap-3">
                                                 <button
                                                     onClick={() => handleDownloadReport('txt')}
-                                                    className="bg-white hover:bg-purple-100 text-purple-700 border border-purple-200 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                                                    className="bg-white hover:bg-purple-100 text-purple-700 border border-purple-200 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1"
                                                 >
-                                                    <FileText className="w-4 h-4" /> Text File (.txt)
+                                                    <FileText className="w-3 h-3" /> Text File (.txt)
                                                 </button>
                                                 <button
                                                     onClick={() => handleDownloadReport('docx')}
-                                                    className="bg-white hover:bg-purple-100 text-blue-700 border border-blue-200 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                                                    className="bg-white hover:bg-purple-100 text-blue-700 border border-blue-200 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1"
                                                 >
-                                                    <FileText className="w-4 h-4" /> Word Doc (.docx)
+                                                    <FileText className="w-3 h-3" /> Word Doc (.docx)
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDownloadReport('pdf')}
+                                                    className="bg-white hover:bg-purple-100 text-red-700 border border-red-200 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1"
+                                                >
+                                                    <FileText className="w-3 h-3" /> PDF File (.pdf)
                                                 </button>
                                             </div>
                                             <button
