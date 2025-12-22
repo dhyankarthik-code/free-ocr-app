@@ -36,10 +36,24 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin'
           },
-          // CSP - Relaxed for Google Analytics/GTM/Vercel
+          // CSP - Relaxed for Google Analytics/GTM/Vercel/DoubleClick
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://va.vercel-scripts.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://*.google.com https://lh3.googleusercontent.com https://ui-avatars.com; font-src 'self' data:; connect-src 'self' https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://vitals.vercel-insights.com https://va.vercel-scripts.com; frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/;"
+            value: [
+              "default-src 'self'",
+              // Scripts: GTM, GA, reCAPTCHA, Vercel
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://va.vercel-scripts.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
+              // Styles
+              "style-src 'self' 'unsafe-inline'",
+              // Images: All Google domains including DoubleClick for GA4
+              "img-src 'self' blob: data: https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://*.google.com https://*.google.co.in https://*.doubleclick.net https://lh3.googleusercontent.com https://ui-avatars.com",
+              // Fonts
+              "font-src 'self' data:",
+              // Connect: Critical - includes stats.g.doubleclick.net and analytics endpoints
+              "connect-src 'self' https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://*.doubleclick.net https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+              // Frames: reCAPTCHA
+              "frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/"
+            ].join('; ')
           }
         ]
       }
