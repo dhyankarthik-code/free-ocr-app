@@ -5,6 +5,7 @@ import { Geist } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import ClientConsentWrapper from "@/components/client-consent-wrapper"
 
 const geist = Geist({ subsets: ["latin"] })
@@ -89,6 +90,7 @@ export default function RootLayout({
         {children}
         <ClientConsentWrapper />
         <Analytics />
+        <SpeedInsights />
         <GoogleAnalytics gaId="G-230FBSCTMJ" />
         {/* Google Tag Manager */}
         <Script
