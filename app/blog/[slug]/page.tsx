@@ -51,7 +51,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     const author = post._embedded?.author?.[0]?.name || 'Team';
 
     return (
-        <div className="min-h-screen bg-white pt-24 pb-16">
+        <div className="bg-white pt-24 pb-16">
             <article className="container mx-auto px-4 max-w-4xl">
                 {/* Back Link */}
                 <div className="mb-8">

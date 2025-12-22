@@ -13,7 +13,7 @@ export default async function BlogPage() {
     const posts = await getPosts();
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-24 pb-16">
+        <div className="bg-gray-50 pt-24 pb-16">
             <div className="container mx-auto px-4">
                 <div className="text-center max-w-3xl mx-auto mb-16">
                     <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 mb-6">
