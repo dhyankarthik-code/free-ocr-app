@@ -4,7 +4,7 @@ import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import { Geist } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import ClientConsentWrapper from "@/components/client-consent-wrapper"
 
