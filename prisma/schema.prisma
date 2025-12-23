@@ -60,3 +60,17 @@ model ChatMessage {
 
   @@index([conversationId])
 }
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  country   String
+  mobile    String
+  message   String
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
+}

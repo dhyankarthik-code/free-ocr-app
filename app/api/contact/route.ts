@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import prisma from "@/lib/db"
 
 export async function POST(request: NextRequest) {
     try {
@@ -16,6 +17,23 @@ export async function POST(request: NextRequest) {
         if (!GOOGLE_SHEET_URL) {
             console.error("GOOGLE_SHEET_WEBHOOK_URL not configured")
             return NextResponse.json({ error: "Configuration error" }, { status: 500 })
+        }
+
+        // Save to Supabase (Non-blocking or parallel preferred, but sequential for simplicity)
+        try {
+            await prisma.contactSubmission.create({
+                data: {
+                    name,
+                    email,
+                    country,
+                    mobile,
+                    message,
+                    ipAddress
+                }
+            })
+        } catch (dbError) {
+            console.error("Failed to save contact submission to Supabase:", dbError)
+            // Continue execution to still send to Google Sheets
         }
 
         // Send data to Google Sheets
