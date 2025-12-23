@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { Resend } from 'resend';
 
-const prisma = new PrismaClient();
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Admin email list
 const ADMIN_EMAILS = [
   'admin@ocr-extraction.com',
@@ -14,6 +11,10 @@ const ADMIN_EMAILS = [
 ];
 
 export async function GET(request: NextRequest) {
+  // Initialize clients inside the function to avoid build-time errors
+  const prisma = new PrismaClient();
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
   try {
     // Verify the request is from Vercel Cron
     const authHeader = request.headers.get('authorization');
