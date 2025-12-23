@@ -29,7 +29,7 @@ const WP_API_URL = 'https://blog.ocr-extraction.com/wp-json/wp/v2';
 
 export async function getPosts(): Promise<BlogPost[]> {
     const res = await fetch(`${WP_API_URL}/posts?_embed&per_page=100`, {
-        next: { revalidate: 3600 }, // Revalidate every hour
+        next: { revalidate: 60 }, // Revalidate every minute
     });
 
     if (!res.ok) {
@@ -41,7 +41,7 @@ export async function getPosts(): Promise<BlogPost[]> {
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
     const res = await fetch(`${WP_API_URL}/posts?_embed&slug=${slug}`, {
-        next: { revalidate: 3600 },
+        next: { revalidate: 60 },
     });
 
     if (!res.ok) {
