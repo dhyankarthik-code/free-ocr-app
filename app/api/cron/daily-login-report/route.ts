@@ -11,15 +11,23 @@ const ADMIN_EMAILS = [
 ];
 
 export async function GET(request: NextRequest) {
-  // Initialize Resend client
-  const resend = new Resend(process.env.RESEND_API_KEY);
-
   try {
     // Verify the request is from Vercel Cron
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Validate Resend API Key
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      console.error('RESEND_API_KEY is not configured');
+      return NextResponse.json(
+        { error: 'Email service not configured' },
+        { status: 500 }
+      );
+    }
+    const resend = new Resend(resendApiKey);
 
     // Calculate 24-hour window from current execution time
     // Since cron runs at 6:00 AM IST (00:30 UTC), this covers the desired window
@@ -219,7 +227,7 @@ export async function GET(request: NextRequest) {
     // Send email to all admins
     const emailPromises = ADMIN_EMAILS.map(email =>
       resend.emails.send({
-        from: 'OCR Extraction Reports <reports@ocr-extraction.com>',
+        from: 'OCR Extraction Reports <onboarding@resend.dev>',
         to: email,
         subject: `Daily Login Report: ${newLoginsCount} New Logins`,
         html: htmlContent,
