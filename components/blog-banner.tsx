@@ -1,11 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import TextType from "@/components/text-type"
 import ShinyText from "@/components/ui/shiny-text"
 
 export default function BlogBanner() {
     const [showTagline, setShowTagline] = useState(false)
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowTagline(true)
+        }, 2300)
+        return () => clearTimeout(timer)
+    }, [])
 
     return (
         <div className="mb-16">
@@ -19,7 +26,7 @@ export default function BlogBanner() {
                         AI-Powered Tool
                     </span>
 
-                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight min-h-[3rem] md:min-h-[4.5rem] flex items-center justify-center">
+                    <h2 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight min-h-[3rem] md:min-h-[4.5rem] flex items-center justify-center whitespace-nowrap">
                         <TextType
                             text={["Welcome to AI technologies blog"]}
                             typingSpeed={50}
@@ -27,7 +34,6 @@ export default function BlogBanner() {
                             cursorCharacter="|"
                             loop={false}
                             className="inline-block"
-                            onSentenceComplete={() => setShowTagline(true)}
                         />
                     </h2>
 
