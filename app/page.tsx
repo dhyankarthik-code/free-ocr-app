@@ -6,6 +6,7 @@ import SmartUploadZone from "@/components/smart-upload-zone"
 import Footer from "@/components/footer"
 import { useSession } from "@/hooks/use-session"
 import ChatWidget from "@/components/chat-widget"
+import CtaSection from "@/components/cta-section"
 
 export default function Home() {
   const { session, logout } = useSession()
@@ -209,26 +210,7 @@ export default function Home() {
         </section>
 
         {/* Try It Now CTA */}
-        <section className="w-full max-w-3xl mt-20 mb-12 px-4 text-center">
-          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-            Try It Now
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Upload your file, click convert, and experience the most accurate OCR tool available online in 2025.
-          </p>
-          <p className="text-gray-500 text-sm">
-            Your data stays secure, your results stay precise, and your workflow becomes effortless.
-          </p>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="mt-6 bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors inline-flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            Upload Your File
-          </button>
-        </section>
+        <CtaSection />
       </main>
 
       {/* Footer */}
