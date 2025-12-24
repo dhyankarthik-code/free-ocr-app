@@ -74,3 +74,17 @@ model ContactSubmission {
   @@index([email])
   @@index([createdAt])
 }
+
+model Visitor {
+  id          String   @id @default(cuid())
+  email       String
+  ipAddress   String?
+  country     String?
+  city        String?
+  region      String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
+}

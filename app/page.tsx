@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { TypeAnimation } from 'react-type-animation';
 import Navbar from "@/components/navbar"
 import UploadZone from "@/components/upload-zone"
-import AuthModal from "@/components/auth-modal"
+import EmailCaptureModal from "@/components/email-capture-modal"
 import Footer from "@/components/footer"
 import { useSession } from "@/hooks/use-session"
 import TextType from "@/components/text-type"
@@ -15,10 +15,19 @@ export default function Home() {
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState("")
   const [processingSteps, setProcessingSteps] = useState<string[]>([])
-  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showEmailModal, setShowEmailModal] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [visitorEmail, setVisitorEmail] = useState<string | null>(null)
   const { session, logout } = useSession()
+
+  // Check for stored visitor email on mount
+  useEffect(() => {
+    const storedEmail = localStorage.getItem('visitor_email')
+    if (storedEmail) {
+      setVisitorEmail(storedEmail)
+    }
+  }, [])
 
   const handleUpload = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) {
@@ -170,13 +179,12 @@ export default function Home() {
       const file = acceptedFiles[0]
       const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
 
-      // Skip login requirement for local development
-      const isLocalhost = typeof window !== 'undefined' &&
-        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      // Check if user has provided email (replaces login requirement)
+      const hasEmail = localStorage.getItem('visitor_email')
 
-      if (!session && !isLocalhost) {
+      if (!hasEmail) {
         setPendingFile(file)
-        setShowAuthModal(true)
+        setShowEmailModal(true)
         return
       }
 
@@ -258,7 +266,7 @@ export default function Home() {
       <Navbar
         session={session}
         onLogout={logout}
-        onLoginClick={() => setShowAuthModal(true)}
+        onLoginClick={() => setShowEmailModal(true)}
       />
 
       {/* Main Content */}
@@ -502,20 +510,19 @@ export default function Home() {
 
       <ChatWidget />
 
-      {/* Auth Modal */}
-      {showAuthModal && (
-        <AuthModal
+      {/* Email Capture Modal */}
+      {showEmailModal && (
+        <EmailCaptureModal
           onClose={() => {
-            setShowAuthModal(false)
+            setShowEmailModal(false)
             setPendingFile(null)
           }}
-          onSuccess={() => {
-            setShowAuthModal(false)
+          onSubmit={(email) => {
+            setVisitorEmail(email)
+            setShowEmailModal(false)
             if (pendingFile) {
               handleUpload(pendingFile)
               setPendingFile(null)
-            } else {
-              window.location.reload()
             }
           }}
         />
