@@ -2,7 +2,17 @@
 
 import { useRouter, usePathname } from "next/navigation"
 
-export default function CtaSection() {
+interface CtaSectionProps {
+    title?: string
+    description?: string
+    subDescription?: string
+}
+
+export default function CtaSection({
+    title = "Try It Now",
+    description = "Upload your file, click convert, and experience the most accurate OCR tool available online in 2025.",
+    subDescription = "Your data stays secure, your results stay precise, and your workflow becomes effortless."
+}: CtaSectionProps) {
     const router = useRouter()
     const pathname = usePathname()
 
@@ -17,14 +27,18 @@ export default function CtaSection() {
     return (
         <section className="w-full max-w-3xl mb-12 px-4 text-center mx-auto">
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                Try It Now
+                {title}
             </h3>
-            <p className="text-gray-600 mb-6">
-                Upload your file, click convert, and experience the most accurate OCR tool available online in 2025.
-            </p>
-            <p className="text-gray-500 text-sm">
-                Your data stays secure, your results stay precise, and your workflow becomes effortless.
-            </p>
+            {description && (
+                <p className="text-gray-600 mb-6">
+                    {description}
+                </p>
+            )}
+            {subDescription && (
+                <p className="text-gray-500 text-sm">
+                    {subDescription}
+                </p>
+            )}
             <button
                 onClick={handleCtaClick}
                 className="mt-6 bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors inline-flex items-center gap-2"
