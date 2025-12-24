@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { TypeAnimation } from 'react-type-animation';
 import Navbar from "@/components/navbar"
 import UploadZone from "@/components/upload-zone"
 import AuthModal from "@/components/auth-modal"
@@ -267,7 +268,18 @@ export default function Home() {
             {/* SEO H1 (Visually Hidden but accessible to crawlers) */}
             {/* SEO H1 (Visually Hidden but accessible to crawlers) */}
             <h1 className="text-gray-900 text-center">
-              Free OCR Extraction tool and Report Generation Tool
+              <TypeAnimation
+                sequence={[
+                  'Free OCR Extraction tool',
+                  1000,
+                  'Free OCR Extraction tool and Report Generation Tool',
+                  1000,
+                ]}
+                wrapper="span"
+                speed={50}
+                style={{ display: 'inline-block' }}
+                repeat={Infinity}
+              />
             </h1>
           </div>
 
