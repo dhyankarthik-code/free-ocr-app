@@ -6,12 +6,16 @@ interface CtaSectionProps {
     title?: string
     description?: string
     subDescription?: string
+    titleClassName?: string
+    descriptionClassName?: string
 }
 
 export default function CtaSection({
     title = "Try It Now",
     description = "Upload your file, click convert, and experience the most accurate OCR tool available online in 2025.",
-    subDescription = "Your data stays secure, your results stay precise, and your workflow becomes effortless."
+    subDescription = "Your data stays secure, your results stay precise, and your workflow becomes effortless.",
+    titleClassName = "text-2xl md:text-3xl font-bold text-gray-900",
+    descriptionClassName = "text-gray-600 mb-6"
 }: CtaSectionProps) {
     const router = useRouter()
     const pathname = usePathname()
@@ -26,11 +30,11 @@ export default function CtaSection({
 
     return (
         <section className="w-full max-w-3xl mb-12 px-4 text-center mx-auto">
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+            <h3 className={titleClassName + " mb-4"}>
                 {title}
             </h3>
             {description && (
-                <p className="text-gray-600 mb-6">
+                <p className={descriptionClassName}>
                     {description}
                 </p>
             )}

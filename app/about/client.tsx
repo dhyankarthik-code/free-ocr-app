@@ -23,8 +23,10 @@ export default function AboutPage() {
             <main className="flex-1 container mx-auto px-4 py-12 max-w-4xl">
                 <CtaSection
                     title="Free online OCR Engine"
-                    description=""
+                    description="Convert images, scanned documents, photos or any documents to text, download in any format, get AI summary and AI report for free"
                     subDescription=""
+                    titleClassName="text-3xl md:text-5xl font-bold text-red-500"
+                    descriptionClassName="text-sm md:text-base text-gray-500 mb-8"
                 />
                 <article className="prose prose-lg max-w-none bg-white p-8 md:p-12 rounded-2xl shadow-sm border border-gray-100">
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">About Us</h1>
