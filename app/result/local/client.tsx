@@ -360,7 +360,7 @@ export default function LocalResultPage() {
                             <CardHeader className="flex flex-col space-y-3 pb-4">
                                 {/* Page Indicator for Multi-page Documents */}
                                 {isMultiPage && (
-                                    <div className="flex items-center justify-between w-full">
+                                    <div className="flex items-center justify-between w-full relative z-10">
                                         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg shadow-md">
                                             <span className="text-lg font-bold">
                                                 {isBatch
@@ -369,7 +369,7 @@ export default function LocalResultPage() {
                                                 }
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 bg-white p-1 rounded-lg shadow-md border border-gray-200">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -379,7 +379,7 @@ export default function LocalResultPage() {
                                                     setText(pages[newPage - 1]?.text || "");
                                                 }}
                                                 disabled={currentPage === 1}
-                                                className="px-4"
+                                                className="px-4 font-semibold hover:bg-blue-50 disabled:opacity-50"
                                             >
                                                 ◀ Prev
                                             </Button>
@@ -392,7 +392,7 @@ export default function LocalResultPage() {
                                                     setText(pages[newPage - 1]?.text || "");
                                                 }}
                                                 disabled={currentPage === pages.length}
-                                                className="px-4"
+                                                className="px-4 font-semibold hover:bg-blue-50 disabled:opacity-50"
                                             >
                                                 Next ▶
                                             </Button>
