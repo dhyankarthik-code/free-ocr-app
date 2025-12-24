@@ -22,16 +22,18 @@ export async function POST(request: NextRequest) {
         let country = null;
         let city = null;
         let region = null;
+        let timezone = null;
 
         if (ipAddress && ipAddress !== 'unknown' && ipAddress !== '127.0.0.1' && ipAddress !== '::1') {
             try {
-                const geoResponse = await fetch(`http://ip-api.com/json/${ipAddress}?fields=status,country,regionName,city`);
+                const geoResponse = await fetch(`http://ip-api.com/json/${ipAddress}?fields=status,country,regionName,city,timezone`);
                 if (geoResponse.ok) {
                     const geoData = await geoResponse.json();
                     if (geoData.status === 'success') {
                         country = geoData.country;
                         city = geoData.city;
                         region = geoData.regionName;
+                        timezone = geoData.timezone;
                     }
                 }
             } catch (geoError) {
@@ -47,6 +49,7 @@ export async function POST(request: NextRequest) {
                 country,
                 city,
                 region,
+                timezone,
                 userAgent,
             },
         });

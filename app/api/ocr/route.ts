@@ -172,6 +172,11 @@ export async function POST(request: NextRequest) {
         const fileSizeMB = file.size / (1024 * 1024)
         const FILE_SIZE_LIMIT_MB = 10
 
+        // Get IP address for anonymous user tracking
+        const forwardedFor = request.headers.get('x-forwarded-for');
+        const realIp = request.headers.get('x-real-ip');
+        const ipAddress = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
+
         // Check Quota for Logged In Users + Lazy Creation
         if (userGoogleId && userEmail) {
             try {
@@ -218,6 +223,45 @@ export async function POST(request: NextRequest) {
                 console.error("Quota/User Check Failed:", dbError)
                 // We don't block if DB fails, to allow usage, or we could block. 
                 // Given the issue, logging is key.
+            }
+        } else {
+            // Check quota for anonymous users based on IP address
+            try {
+                const { default: prisma } = await import("@/lib/db")
+
+                // Find or create visitor record by IP
+                const visitor = await prisma.visitor.findFirst({
+                    where: { ipAddress: ipAddress },
+                    orderBy: { createdAt: 'desc' }
+                })
+
+                if (visitor) {
+                    const visitorTimezone = visitor.timezone || 'UTC'
+
+                    // Use the same timezone-aware reset logic as logged-in users
+                    const { checkAndResetUsage } = await import("@/lib/usage-limit")
+
+                    // Adapt visitor to match User interface for the shared function
+                    const visitorAsUser = {
+                        id: visitor.id,
+                        usagebytes: visitor.usageBytes || 0,
+                        lastUsageDate: visitor.lastUsageDate,
+                        timezone: visitorTimezone
+                    }
+
+                    const currentUsageBytes = await checkAndResetUsage(visitorAsUser as any, prisma as any, 'visitor')
+
+                    const currentUsageMB = currentUsageBytes / (1024 * 1024)
+
+                    if (currentUsageMB + fileSizeMB > FILE_SIZE_LIMIT_MB) {
+                        return NextResponse.json({
+                            error: 'Daily Quota exceeded',
+                            details: `You have reached the 10MB daily upload limit. Resets at 00:00 (${visitorTimezone}). Used: ${currentUsageMB.toFixed(2)}MB`
+                        }, { status: 403 });
+                    }
+                }
+            } catch (dbError) {
+                console.error("Anonymous Quota Check Failed:", dbError)
             }
         }
 
@@ -295,6 +339,26 @@ export async function POST(request: NextRequest) {
                     } catch (e) {
                         console.error("Failed to update usage stats", e)
                     }
+                } else {
+                    // Update visitor usage
+                    try {
+                        const { default: prisma } = await import("@/lib/db")
+                        const visitor = await prisma.visitor.findFirst({
+                            where: { ipAddress: ipAddress },
+                            orderBy: { createdAt: 'desc' }
+                        })
+                        if (visitor) {
+                            await prisma.visitor.update({
+                                where: { id: visitor.id },
+                                data: {
+                                    usageBytes: { increment: file.size },
+                                    lastUsageDate: new Date()
+                                }
+                            })
+                        }
+                    } catch (e) {
+                        console.error("Failed to update visitor usage stats", e)
+                    }
                 }
 
                 return NextResponse.json({
@@ -338,6 +402,26 @@ export async function POST(request: NextRequest) {
                     })
                 } catch (e) {
                     console.error("Failed to update usage stats", e)
+                }
+            } else {
+                // Update visitor usage
+                try {
+                    const { default: prisma } = await import("@/lib/db")
+                    const visitor = await prisma.visitor.findFirst({
+                        where: { ipAddress: ipAddress },
+                        orderBy: { createdAt: 'desc' }
+                    })
+                    if (visitor) {
+                        await prisma.visitor.update({
+                            where: { id: visitor.id },
+                            data: {
+                                usageBytes: { increment: file.size },
+                                lastUsageDate: new Date()
+                            }
+                        })
+                    }
+                } catch (e) {
+                    console.error("Failed to update visitor usage stats", e)
                 }
             }
 
