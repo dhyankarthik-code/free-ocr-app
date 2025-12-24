@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { TypeAnimation } from 'react-type-animation';
 import Navbar from "@/components/navbar"
 import UploadZone from "@/components/upload-zone"
-import EmailCaptureModal from "@/components/email-capture-modal"
 import Footer from "@/components/footer"
 import { useSession } from "@/hooks/use-session"
 import TextType from "@/components/text-type"
@@ -15,19 +14,28 @@ export default function Home() {
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState("")
   const [processingSteps, setProcessingSteps] = useState<string[]>([])
-  const [showEmailModal, setShowEmailModal] = useState(false)
-  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
-  const [visitorEmail, setVisitorEmail] = useState<string | null>(null)
   const { session, logout } = useSession()
+  const visitorTrackedRef = useRef(false)
 
-  // Check for stored visitor email on mount
-  useEffect(() => {
-    const storedEmail = localStorage.getItem('visitor_email')
-    if (storedEmail) {
-      setVisitorEmail(storedEmail)
+  // Track visitor silently on first interaction (captures email from session cookie if logged in)
+  const trackVisitor = useCallback(async () => {
+    if (visitorTrackedRef.current) return
+    visitorTrackedRef.current = true
+
+    try {
+      // Get email from session (if user was previously logged in)
+      const email = session?.email || 'anonymous'
+
+      await fetch('/api/visitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+    } catch (error) {
+      console.error('Visitor tracking failed:', error)
     }
-  }, [])
+  }, [session])
 
   const handleUpload = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) {
@@ -179,14 +187,10 @@ export default function Home() {
       const file = acceptedFiles[0]
       const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
 
-      // Check if user has provided email (replaces login requirement)
-      const hasEmail = localStorage.getItem('visitor_email')
+      // Track visitor silently (no popup)
+      trackVisitor()
 
-      if (!hasEmail) {
-        setPendingFile(file)
-        setShowEmailModal(true)
-        return
-      }
+      // Proceed directly to upload - no login required
 
       // Single PDF or single image - use standard upload
       if (isPDF || imageFiles.length === 1) {
@@ -266,7 +270,7 @@ export default function Home() {
       <Navbar
         session={session}
         onLogout={logout}
-        onLoginClick={() => setShowEmailModal(true)}
+        onLoginClick={() => { }}
       />
 
       {/* Main Content */}
@@ -510,23 +514,7 @@ export default function Home() {
 
       <ChatWidget />
 
-      {/* Email Capture Modal */}
-      {showEmailModal && (
-        <EmailCaptureModal
-          onClose={() => {
-            setShowEmailModal(false)
-            setPendingFile(null)
-          }}
-          onSubmit={(email) => {
-            setVisitorEmail(email)
-            setShowEmailModal(false)
-            if (pendingFile) {
-              handleUpload(pendingFile)
-              setPendingFile(null)
-            }
-          }}
-        />
-      )}
+
     </div>
   )
 }
