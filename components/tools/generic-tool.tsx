@@ -74,11 +74,46 @@ export default function GenericTool({ config }: { config: ToolConfig }) {
         setFileStates(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item))
     }
 
+    // Validate file type based on expected format
+    const validateFileType = (file: File, expectedFormat: string): boolean => {
+        const type = file.type.toLowerCase()
+        const name = file.name.toLowerCase()
+
+        switch (expectedFormat) {
+            case 'Image':
+                return type.startsWith('image/')
+            case 'PDF':
+                return type === 'application/pdf' || name.endsWith('.pdf')
+            case 'Text':
+                return type.startsWith('text/') || name.endsWith('.txt')
+            case 'Word':
+                return type.includes('word') || name.endsWith('.doc') || name.endsWith('.docx')
+            case 'Excel':
+                return type.includes('sheet') || type.includes('excel') || name.endsWith('.xls') || name.endsWith('.xlsx') || name.endsWith('.csv')
+            case 'PPT':
+                return type.includes('presentation') || type.includes('powerpoint') || name.endsWith('.ppt') || name.endsWith('.pptx')
+            default:
+                return true // Allow if format not recognized
+        }
+    }
+
     const processFileItem = async (fileState: FileState) => {
         const { file, id } = fileState
         updateFileState(id, { status: 'processing', progress: 10 })
 
         try {
+            // Validate file type based on expected input format
+            const isValidType = validateFileType(file, config.fromFormat)
+            if (!isValidType) {
+                updateFileState(id, {
+                    status: 'error',
+                    progress: 100,
+                    error: `Invalid file type. Expected ${config.fromFormat} file.`
+                })
+                toast.error(`${file.name}: Invalid file type`)
+                return
+            }
+
             if (config.type === 'ocr') {
                 const formData = new FormData()
                 formData.append('file', file)
@@ -124,9 +159,7 @@ export default function GenericTool({ config }: { config: ToolConfig }) {
                 }
                 toast.success(`${file.name} ready!`)
             } else {
-                setTimeout(() => {
-                    updateFileState(id, { status: 'error', progress: 100, error: "Coming soon" })
-                }, 1500)
+                updateFileState(id, { status: 'error', progress: 100, error: "This feature is coming soon" })
             }
 
         } catch (err: any) {
