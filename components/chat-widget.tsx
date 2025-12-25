@@ -225,8 +225,16 @@ export default function ChatWidget() {
                     <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col gap-4">
                         {messages.map((msg) => {
                             const renderMarkdown = (text: string) => {
-                                // Basic regex markdown parser
-                                let html = text
+                                // 1. Escape HTML entities to prevent XSS
+                                let safeText = text
+                                    .replace(/&/g, "&amp;")
+                                    .replace(/</g, "&lt;")
+                                    .replace(/>/g, "&gt;")
+                                    .replace(/"/g, "&quot;")
+                                    .replace(/'/g, "&#039;");
+
+                                // 2. Apply Basic Markdown Formatting
+                                let html = safeText
                                     // Bold
                                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                                     // Italic

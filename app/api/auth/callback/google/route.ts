@@ -58,9 +58,8 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      console.error("[Auth] Token exchange failed:", errorText);
       console.error("[Auth] Status:", tokenResponse.status);
+      console.error("[Auth] Token exchange failed with status:", tokenResponse.status);
       return NextResponse.redirect(new URL("/?error=token_exchange_failed", baseUrl));
     }
 
