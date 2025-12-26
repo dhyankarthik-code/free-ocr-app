@@ -367,11 +367,11 @@ export default function ServicesPage() {
                 </div>
 
                 {/* Industry Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="flex flex-wrap justify-center gap-8">
                     {services.map((service, index) => (
                         <div
                             key={index}
-                            className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col h-full"
+                            className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.34rem)] bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col h-full"
                         >
                             <div className="p-6">
                                 <div className="bg-gray-50 w-14 h-14 rounded-full flex items-center justify-center mb-4">
