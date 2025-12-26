@@ -2,8 +2,6 @@
 
 Welcome to **Infygalaxy-OCR**, a cutting-edge, free online OCR (Optical Character Recognition) tool designed to convert your images and documents into editable text with high accuracy.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://ocr-extraction.com)
-
 ## 🚀 Overview
 
 Infygalaxy-OCR leverages advanced AI models to provide fast and accurate text extraction from various file formats. Whether you need to digitize scanned documents, extract text from screenshots, or convert PDFs, our platform makes it simple and efficient.
