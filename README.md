@@ -49,10 +49,8 @@ To run this project locally, follow these steps:
 
 5.  Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 🤝 Contributing
-
-Contributions are welcome! Please run the existing tests and linting before submitting a pull request.
-
 ## 📄 License
 
-This project is open-source and available under the information license.
+Copyright © 2024 Infygalaxy-OCR. All Rights Reserved.
+
+This project is proprietary and confidential. Unauthorized copying, distribution, or use of this source code, via any medium, is strictly prohibited.
