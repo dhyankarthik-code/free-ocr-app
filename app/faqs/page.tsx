@@ -1,6 +1,16 @@
-"use client"
 
 
+
+
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Frequently Asked Questions - Infy Galaxy OCR',
+    description: 'Common questions about Infy Galaxy OCR. Learn about supported formats, security, and usage.',
+    alternates: {
+        canonical: '/faqs',
+    },
+}
 
 export default function FAQPage() {
     return (
