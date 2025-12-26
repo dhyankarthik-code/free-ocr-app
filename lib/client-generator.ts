@@ -1,8 +1,11 @@
 
 import { Document, Packer, Paragraph, TextRun } from 'docx'
-import { utils, write } from 'xlsx'
+import { utils, write, read } from 'xlsx'
 import PptxGenJS from 'pptxgenjs'
 import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import mammoth from 'mammoth'
+import JSZip from 'jszip'
 
 export const generateWord = async (text: string): Promise<Blob> => {
     const doc = new Document({
@@ -320,3 +323,402 @@ export const generateImageFromText = (text: string): Promise<Blob> => {
         }, 'image/png');
     });
 }
+
+/**
+ * Convert Excel file to PDF
+ * Uses xlsx to parse and jspdf-autotable for table rendering
+ */
+export const generatePDFFromExcel = async (file: File): Promise<Blob> => {
+    const buffer = await file.arrayBuffer();
+    const workbook = read(buffer);
+    const doc = new jsPDF();
+
+    let isFirstSheet = true;
+
+    for (const sheetName of workbook.SheetNames) {
+        if (!isFirstSheet) {
+            doc.addPage();
+        }
+        isFirstSheet = false;
+
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = utils.sheet_to_json<string[]>(worksheet, { header: 1 });
+
+        if (jsonData.length === 0) continue;
+
+        // Add sheet name as title
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(sheetName, 14, 15);
+
+        // Extract headers and body
+        const headers = jsonData[0] || [];
+        const body = jsonData.slice(1);
+
+        // Use autoTable for nice table rendering
+        autoTable(doc, {
+            head: [headers.map(h => String(h || ''))],
+            body: body.map(row =>
+                Array.isArray(row)
+                    ? row.map(cell => String(cell ?? ''))
+                    : [String(row ?? '')]
+            ),
+            startY: 22,
+            styles: {
+                fontSize: 9,
+                cellPadding: 3,
+            },
+            headStyles: {
+                fillColor: [220, 53, 69], // Brand red color
+                textColor: 255,
+                fontStyle: 'bold',
+            },
+            alternateRowStyles: {
+                fillColor: [248, 249, 250],
+            },
+            margin: { top: 22 },
+        });
+    }
+
+    return doc.output('blob');
+};
+
+/**
+ * Convert Word document to PDF
+ * Uses mammoth to extract text/HTML and jsPDF for rendering
+ */
+export const generatePDFFromWord = async (file: File): Promise<Blob> => {
+    const buffer = await file.arrayBuffer();
+
+    // Extract raw text from DOCX using mammoth
+    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+    const text = result.value;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const lineHeight = 7;
+    const maxWidth = pageWidth - margin * 2;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+
+    // Split text into paragraphs
+    const paragraphs = text.split(/\n\n+/);
+    let y = margin;
+
+    for (const paragraph of paragraphs) {
+        if (!paragraph.trim()) continue;
+
+        const lines = doc.splitTextToSize(paragraph.trim(), maxWidth);
+
+        for (const line of lines) {
+            if (y + lineHeight > pageHeight - margin) {
+                doc.addPage();
+                y = margin;
+            }
+            doc.text(line, margin, y);
+            y += lineHeight;
+        }
+
+        // Add paragraph spacing
+        y += 4;
+    }
+
+    return doc.output('blob');
+};
+
+/**
+ * Convert PowerPoint to PDF
+ * Uses JSZip to parse PPTX and extract slide content
+ */
+export const generatePDFFromPPT = async (file: File): Promise<Blob> => {
+    const buffer = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(buffer);
+
+    const doc = new jsPDF('landscape'); // PPT is usually landscape
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // Find all slide XML files
+    const slideFiles: string[] = [];
+    zip.forEach((relativePath) => {
+        if (relativePath.match(/ppt\/slides\/slide\d+\.xml$/)) {
+            slideFiles.push(relativePath);
+        }
+    });
+
+    // Sort slides numerically
+    slideFiles.sort((a, b) => {
+        const numA = parseInt(a.match(/slide(\d+)\.xml/)?.[1] || '0');
+        const numB = parseInt(b.match(/slide(\d+)\.xml/)?.[1] || '0');
+        return numA - numB;
+    });
+
+    let isFirstSlide = true;
+    let slideNumber = 1;
+
+    for (const slidePath of slideFiles) {
+        if (!isFirstSlide) {
+            doc.addPage('landscape');
+        }
+        isFirstSlide = false;
+
+        const slideFile = zip.file(slidePath);
+        if (!slideFile) continue;
+
+        const slideXml = await slideFile.async('text');
+
+        // Parse XML to extract text content
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(slideXml, 'text/xml');
+
+        // Extract all text elements (a:t tags contain text in PPTX)
+        const textElements = xmlDoc.getElementsByTagName('a:t');
+        const texts: string[] = [];
+
+        for (let i = 0; i < textElements.length; i++) {
+            const text = textElements[i].textContent?.trim();
+            if (text) texts.push(text);
+        }
+
+        // Draw slide background
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+        // Draw slide border
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.5);
+        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+
+        // Add slide number
+        doc.setFontSize(10);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Slide ${slideNumber}`, pageWidth - 25, pageHeight - 8);
+
+        // Render text content
+        doc.setTextColor(0, 0, 0);
+        let y = 25;
+        let isTitle = true;
+
+        for (const text of texts) {
+            if (isTitle) {
+                // First text is usually the title
+                doc.setFontSize(24);
+                doc.setFont('helvetica', 'bold');
+                const titleLines = doc.splitTextToSize(text, pageWidth - 40);
+                doc.text(titleLines, 20, y);
+                y += titleLines.length * 12 + 15;
+                isTitle = false;
+            } else {
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'normal');
+                const contentLines = doc.splitTextToSize(text, pageWidth - 40);
+
+                if (y + contentLines.length * 8 > pageHeight - 20) {
+                    // Text overflow - just stop for this slide
+                    break;
+                }
+
+                doc.text(contentLines, 20, y);
+                y += contentLines.length * 8 + 5;
+            }
+        }
+
+        slideNumber++;
+    }
+
+    return doc.output('blob');
+};
+
+/**
+ * Generate merged PDF from multiple Excel files
+ */
+export const generateMergedPDFFromExcel = async (files: File[]): Promise<Blob> => {
+    const doc = new jsPDF();
+    let isFirstPage = true;
+
+    for (const file of files) {
+        const buffer = await file.arrayBuffer();
+        const workbook = read(buffer);
+
+        for (const sheetName of workbook.SheetNames) {
+            if (!isFirstPage) {
+                doc.addPage();
+            }
+            isFirstPage = false;
+
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = utils.sheet_to_json<string[]>(worksheet, { header: 1 });
+
+            if (jsonData.length === 0) continue;
+
+            // Add file and sheet name as title
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${file.name} - ${sheetName}`, 14, 15);
+
+            const headers = jsonData[0] || [];
+            const body = jsonData.slice(1);
+
+            autoTable(doc, {
+                head: [headers.map(h => String(h || ''))],
+                body: body.map(row =>
+                    Array.isArray(row)
+                        ? row.map(cell => String(cell ?? ''))
+                        : [String(row ?? '')]
+                ),
+                startY: 22,
+                styles: { fontSize: 9, cellPadding: 3 },
+                headStyles: { fillColor: [220, 53, 69], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [248, 249, 250] },
+                margin: { top: 22 },
+            });
+        }
+    }
+
+    return doc.output('blob');
+};
+
+/**
+ * Generate merged PDF from multiple Word files
+ */
+export const generateMergedPDFFromWord = async (files: File[]): Promise<Blob> => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const lineHeight = 7;
+    const maxWidth = pageWidth - margin * 2;
+    let isFirstPage = true;
+
+    for (const file of files) {
+        if (!isFirstPage) {
+            doc.addPage();
+        }
+        isFirstPage = false;
+
+        const buffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+        const text = result.value;
+
+        // Add file name as header
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(file.name, margin, margin);
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+
+        const paragraphs = text.split(/\n\n+/);
+        let y = margin + 12;
+
+        for (const paragraph of paragraphs) {
+            if (!paragraph.trim()) continue;
+
+            const lines = doc.splitTextToSize(paragraph.trim(), maxWidth);
+
+            for (const line of lines) {
+                if (y + lineHeight > pageHeight - margin) {
+                    doc.addPage();
+                    y = margin;
+                }
+                doc.text(line, margin, y);
+                y += lineHeight;
+            }
+            y += 4;
+        }
+    }
+
+    return doc.output('blob');
+};
+
+/**
+ * Generate merged PDF from multiple PPT files
+ */
+export const generateMergedPDFFromPPT = async (files: File[]): Promise<Blob> => {
+    const doc = new jsPDF('landscape');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let isFirstSlide = true;
+    let slideNumber = 1;
+
+    for (const file of files) {
+        const buffer = await file.arrayBuffer();
+        const zip = await JSZip.loadAsync(buffer);
+
+        const slideFiles: string[] = [];
+        zip.forEach((relativePath) => {
+            if (relativePath.match(/ppt\/slides\/slide\d+\.xml$/)) {
+                slideFiles.push(relativePath);
+            }
+        });
+
+        slideFiles.sort((a, b) => {
+            const numA = parseInt(a.match(/slide(\d+)\.xml/)?.[1] || '0');
+            const numB = parseInt(b.match(/slide(\d+)\.xml/)?.[1] || '0');
+            return numA - numB;
+        });
+
+        for (const slidePath of slideFiles) {
+            if (!isFirstSlide) {
+                doc.addPage('landscape');
+            }
+            isFirstSlide = false;
+
+            const slideFile = zip.file(slidePath);
+            if (!slideFile) continue;
+
+            const slideXml = await slideFile.async('text');
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(slideXml, 'text/xml');
+            const textElements = xmlDoc.getElementsByTagName('a:t');
+            const texts: string[] = [];
+
+            for (let i = 0; i < textElements.length; i++) {
+                const text = textElements[i].textContent?.trim();
+                if (text) texts.push(text);
+            }
+
+            // Draw slide
+            doc.setFillColor(255, 255, 255);
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(0.5);
+            doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+
+            // File indicator
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(file.name, 10, pageHeight - 8);
+            doc.text(`Slide ${slideNumber}`, pageWidth - 25, pageHeight - 8);
+
+            doc.setTextColor(0, 0, 0);
+            let y = 25;
+            let isTitle = true;
+
+            for (const text of texts) {
+                if (isTitle) {
+                    doc.setFontSize(24);
+                    doc.setFont('helvetica', 'bold');
+                    const titleLines = doc.splitTextToSize(text, pageWidth - 40);
+                    doc.text(titleLines, 20, y);
+                    y += titleLines.length * 12 + 15;
+                    isTitle = false;
+                } else {
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'normal');
+                    const contentLines = doc.splitTextToSize(text, pageWidth - 40);
+                    if (y + contentLines.length * 8 > pageHeight - 20) break;
+                    doc.text(contentLines, 20, y);
+                    y += contentLines.length * 8 + 5;
+                }
+            }
+
+            slideNumber++;
+        }
+    }
+
+    return doc.output('blob');
+};

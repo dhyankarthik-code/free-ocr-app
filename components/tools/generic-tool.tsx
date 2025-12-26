@@ -16,13 +16,20 @@ import {
     generateMergedWord,
     generateMergedExcel,
     generateMergedPPT,
-    generateImageFromText
+    generateImageFromText,
+    generatePDFFromExcel,
+    generatePDFFromWord,
+    generatePDFFromPPT,
+    generateMergedPDFFromExcel,
+    generateMergedPDFFromWord,
+    generateMergedPDFFromPPT
 } from "@/lib/client-generator"
 import JSZip from 'jszip'
 
 export type ToolType =
     | 'ocr' // Use main OCR API
     | 'client-convert' // Use client-side logic
+    | 'office-to-pdf' // Direct Office file to PDF conversion
     | 'coming-soon'
 
 export interface ToolConfig {
@@ -170,6 +177,23 @@ export default function GenericTool({ config }: { config: ToolConfig }) {
                     updateFileState(id, { status: 'success', progress: 100, result: { text } })
                 }
                 toast.success(`${file.name} ready!`)
+            } else if (config.type === 'office-to-pdf') {
+                // Direct Office file to PDF conversion
+                updateFileState(id, { progress: 50 })
+
+                let pdfBlob: Blob
+                if (config.fromFormat === 'Excel') {
+                    pdfBlob = await generatePDFFromExcel(file)
+                } else if (config.fromFormat === 'Word') {
+                    pdfBlob = await generatePDFFromWord(file)
+                } else if (config.fromFormat === 'PPT') {
+                    pdfBlob = await generatePDFFromPPT(file)
+                } else {
+                    throw new Error(`Unsupported format: ${config.fromFormat}`)
+                }
+
+                updateFileState(id, { status: 'success', progress: 100, result: { pdfBlob, officeFile: true } })
+                toast.success(`${file.name} converted!`)
             } else {
                 updateFileState(id, { status: 'error', progress: 100, error: "This feature is coming soon" })
             }
@@ -188,6 +212,12 @@ export default function GenericTool({ config }: { config: ToolConfig }) {
             const { file, result } = fileState
             let blob: Blob | null = null
             const filename = file.name.split('.')[0] + `_converted.${config.toFormat.toLowerCase()}`
+
+            // Handle office-to-pdf conversion result
+            if (result.officeFile && result.pdfBlob) {
+                downloadBlob(result.pdfBlob, filename)
+                return
+            }
 
             if (result.image && config.toFormat === 'PDF') {
                 blob = await generatePDFFromImage(file)
@@ -237,7 +267,27 @@ export default function GenericTool({ config }: { config: ToolConfig }) {
         if (successfulFiles.length === 0) return
 
         try {
-            // Merged PDF Mode - for ALL PDF outputs
+            // Office-to-PDF merged mode - use specialized merge functions
+            if (config.type === 'office-to-pdf' && config.toFormat === 'PDF') {
+                const files = successfulFiles.map(fs => fs.file)
+                let blob: Blob
+
+                if (config.fromFormat === 'Excel') {
+                    blob = await generateMergedPDFFromExcel(files)
+                } else if (config.fromFormat === 'Word') {
+                    blob = await generateMergedPDFFromWord(files)
+                } else if (config.fromFormat === 'PPT') {
+                    blob = await generateMergedPDFFromPPT(files)
+                } else {
+                    throw new Error(`Unsupported format: ${config.fromFormat}`)
+                }
+
+                downloadBlob(blob, `${config.title.toLowerCase().replace(/\s+/g, '_')}_merged.pdf`)
+                toast.success("Merged PDF Downloaded!")
+                return
+            }
+
+            // Merged PDF Mode - for image/text to PDF outputs
             if (config.toFormat === 'PDF') {
                 const blob = await generateMergedPDF(successfulFiles)
                 downloadBlob(blob, `${config.title.toLowerCase().replace(/\s+/g, '_')}_merged.pdf`)

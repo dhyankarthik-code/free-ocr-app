@@ -37,6 +37,9 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
       items: [
         { label: 'Image to PDF', href: '/tools/image-to-pdf' },
         { label: 'Text to PDF', href: '/tools/text-to-pdf' },
+        { label: 'Excel to PDF', href: '/tools/excel-to-pdf' },
+        { label: 'Word to PDF', href: '/tools/word-to-pdf' },
+        { label: 'PPT to PDF', href: '/tools/ppt-to-pdf' },
       ]
     },
     {
