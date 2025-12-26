@@ -810,3 +810,90 @@ export const generateImagesFromPPT = async (file: File): Promise<Blob[]> => {
     const pdfFile = new File([pdfBlob], 'temp.pdf', { type: 'application/pdf' });
     return await generateImagesFromPDF(pdfFile);
 };
+
+/**
+ * Convert PDF to Excel
+ * Extracts text from PDF and creates Excel rows
+ */
+export const generateExcelFromPDF = async (file: File): Promise<Blob> => {
+    const pdfjs = await getPdfJs();
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+
+    let allText = '';
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str).join(' ');
+        allText += pageText + '\n';
+    }
+
+    // Split into rows and filter empty lines
+    const rows = allText.split('\n').filter(line => line.trim()).map(line => [line]);
+
+    // Create Excel workbook
+    const worksheet = utils.aoa_to_sheet(rows);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Extracted Text');
+
+    return new Blob([write(workbook, { bookType: 'xlsx', type: 'array' })], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+};
+
+/**
+ * Convert Word to Excel
+ * Extracts text from Word and creates Excel rows
+ */
+export const generateExcelFromWord = async (file: File): Promise<Blob> => {
+    const buffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+    const text = result.value;
+
+    // Split into rows and filter empty lines
+    const rows = text.split('\n').filter(line => line.trim()).map(line => [line]);
+
+    // Create Excel workbook
+    const worksheet = utils.aoa_to_sheet(rows);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Extracted Text');
+
+    return new Blob([write(workbook, { bookType: 'xlsx', type: 'array' })], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+};
+
+/**
+ * Convert PPT to Excel
+ * Extracts text from PowerPoint slides and creates Excel rows
+ */
+export const generateExcelFromPPT = async (file: File): Promise<Blob> => {
+    const buffer = await file.arrayBuffer();
+    const zip = new JSZip();
+    const zipContent = await zip.loadAsync(buffer);
+
+    const slideFiles = Object.keys(zipContent.files)
+        .filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'))
+        .sort();
+
+    const rows: string[][] = [];
+
+    for (const slideFile of slideFiles) {
+        const slideXml = await zipContent.files[slideFile].async('text');
+        const textMatches = slideXml.match(/<a:t>([^<]+)<\/a:t>/g) || [];
+        const slideText = textMatches.map(match => match.replace(/<\/?a:t>/g, '')).join(' ');
+
+        if (slideText.trim()) {
+            rows.push([slideText]);
+        }
+    }
+
+    // Create Excel workbook
+    const worksheet = utils.aoa_to_sheet(rows.length > 0 ? rows : [['No text found']]);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Extracted Text');
+
+    return new Blob([write(workbook, { bookType: 'xlsx', type: 'array' })], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+};

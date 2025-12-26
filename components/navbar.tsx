@@ -24,6 +24,7 @@ interface NavbarProps {
 export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileExpandedCategory, setMobileExpandedCategory] = useState<string | null>(null)
+  const [isToolsOpen, setIsToolsOpen] = useState(false)
 
   const navLinks = [
     { label: 'About Us', href: '/about' },
@@ -46,7 +47,6 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
       name: "Document Tools",
       items: [
         { label: 'Text to Word', href: '/tools/text-to-word' },
-        { label: 'Text to Excel', href: '/tools/text-to-excel' },
         { label: 'Text to PPT', href: '/tools/text-to-ppt' },
       ]
     },
@@ -58,6 +58,16 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
         { label: 'Text to Image', href: '/tools/text-to-image' },
         { label: 'Excel to Image', href: '/tools/excel-to-image' },
         { label: 'PPT to Image', href: '/tools/ppt-to-image' },
+      ]
+    },
+    {
+      name: "Excel Tools",
+      items: [
+        { label: 'PDF to Excel', href: '/tools/pdf-to-excel' },
+        { label: 'Word to Excel', href: '/tools/word-to-excel' },
+        { label: 'Text to Excel', href: '/tools/text-to-excel' },
+        { label: 'Image to Excel', href: '/tools/image-to-excel' },
+        { label: 'PPT to Excel', href: '/tools/ppt-to-excel' },
       ]
     }
   ]
@@ -86,16 +96,16 @@ export default function Navbar({ session, onLogout, onLoginClick }: NavbarProps)
             </Link>
           ))}
 
-          <DropdownMenu>
+          <DropdownMenu open={isToolsOpen} onOpenChange={setIsToolsOpen}>
             <DropdownMenuTrigger className="flex items-center gap-1 text-lg font-medium text-gray-700 hover:text-red-500 transition-colors outline-none data-[state=open]:text-red-500 group">
               Tools <ChevronDown className="w-4 h-4 transition-transform group-data-[state=open]:rotate-180" />
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="center"
               sideOffset={8}
-              className="w-[600px] bg-white border border-gray-100 shadow-xl rounded-xl p-6 animate-in fade-in zoom-in-95 duration-200 z-[110]"
+              className="w-[800px] bg-white border border-gray-100 shadow-xl rounded-xl p-6 animate-in fade-in zoom-in-95 duration-200 z-[110]"
             >
-              <div className="grid grid-cols-3 gap-8">
+              <div className="grid grid-cols-4 gap-8">
                 {toolCategories.map((category) => (
                   <div key={category.name} className="space-y-2">
                     <div className="text-sm font-bold text-red-500 uppercase tracking-wider mb-2">

@@ -26,7 +26,10 @@ import {
     generateImagesFromPDF,
     generateImagesFromWord,
     generateImagesFromExcel,
-    generateImagesFromPPT
+    generateImagesFromPPT,
+    generateExcelFromPDF,
+    generateExcelFromWord,
+    generateExcelFromPPT
 } from "@/lib/client-generator"
 import JSZip from 'jszip'
 
@@ -35,6 +38,7 @@ export type ToolType =
     | 'client-convert' // Use client-side logic
     | 'office-to-pdf' // Direct Office file to PDF conversion
     | 'office-to-image' // Convert document to images (one per page)
+    | 'office-to-excel' // Convert document to Excel
     | 'coming-soon'
 
 export interface ToolConfig {
@@ -218,6 +222,23 @@ export default function GenericTool({ config }: { config: ToolConfig }) {
 
                 updateFileState(id, { status: 'success', progress: 100, result: { images } })
                 toast.success(`${file.name} converted!`)
+            } else if (config.type === 'office-to-excel') {
+                // Document to Excel conversion
+                updateFileState(id, { progress: 50 })
+
+                let excelBlob: Blob
+                if (config.fromFormat === 'PDF') {
+                    excelBlob = await generateExcelFromPDF(file)
+                } else if (config.fromFormat === 'Word') {
+                    excelBlob = await generateExcelFromWord(file)
+                } else if (config.fromFormat === 'PPT') {
+                    excelBlob = await generateExcelFromPPT(file)
+                } else {
+                    throw new Error(`Unsupported format: ${config.fromFormat}`)
+                }
+
+                updateFileState(id, { status: 'success', progress: 100, result: { excelBlob, officeFile: true } })
+                toast.success(`${file.name} converted!`)
             } else {
                 updateFileState(id, { status: 'error', progress: 100, error: "This feature is coming soon" })
             }
@@ -237,9 +258,16 @@ export default function GenericTool({ config }: { config: ToolConfig }) {
             let blob: Blob | null = null
             const filename = file.name.split('.')[0] + `_converted.${config.toFormat.toLowerCase()}`
 
+
             // Handle office-to-pdf conversion result
             if (result.officeFile && result.pdfBlob) {
                 downloadBlob(result.pdfBlob, filename)
+                return
+            }
+
+            // Handle office-to-excel conversion result
+            if (result.officeFile && result.excelBlob) {
+                downloadBlob(result.excelBlob, filename.replace('pdf', 'xlsx').replace('docx', 'xlsx').replace('pptx', 'xlsx'))
                 return
             }
 
