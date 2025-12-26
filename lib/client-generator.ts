@@ -11,7 +11,8 @@ import JSZip from 'jszip'
 async function getPdfJs() {
     const pdfjs = await import('pdfjs-dist');
     if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-        pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+        // Use the worker from public folder
+        pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
     }
     return pdfjs;
 }
