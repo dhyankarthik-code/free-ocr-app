@@ -6,11 +6,14 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import mammoth from 'mammoth'
 import JSZip from 'jszip'
-import * as pdfjsLib from 'pdfjs-dist'
 
-// Configure PDF.js worker
-if (typeof window !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+// Helper to load pdfjs-dist dynamically to avoid SSR issues
+async function getPdfJs() {
+    const pdfjs = await import('pdfjs-dist');
+    if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+        pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    }
+    return pdfjs;
 }
 
 export const generateWord = async (text: string): Promise<Blob> => {
@@ -744,8 +747,9 @@ export const generateMergedPDFFromPPT = async (files: File[]): Promise<Blob> => 
  * Uses pdfjs-dist to render each page to canvas
  */
 export const generateImagesFromPDF = async (file: File): Promise<Blob[]> => {
+    const pdfjs = await getPdfJs();
     const arrayBuffer = await file.arrayBuffer();
-    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
     const pdf = await loadingTask.promise;
     const images: Blob[] = [];
 
