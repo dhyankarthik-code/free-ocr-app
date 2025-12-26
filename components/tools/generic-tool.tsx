@@ -29,7 +29,10 @@ import {
     generateImagesFromPPT,
     generateExcelFromPDF,
     generateExcelFromWord,
-    generateExcelFromPPT
+    generateExcelFromPPT,
+    generateMergedExcelFromPDF,
+    generateMergedExcelFromWord,
+    generateMergedExcelFromPPT
 } from "@/lib/client-generator"
 import JSZip from 'jszip'
 
@@ -351,6 +354,26 @@ export default function GenericTool({ config }: { config: ToolConfig }) {
 
                 downloadBlob(blob, `${config.title.toLowerCase().replace(/\s+/g, '_')}_merged.pdf`)
                 toast.success("Merged PDF Downloaded!")
+                return
+            }
+
+            // Office-to-Excel merged mode
+            if (config.type === 'office-to-excel' && config.toFormat === 'Excel') {
+                const files = successfulFiles.map(fs => fs.file)
+                let blob: Blob
+
+                if (config.fromFormat === 'PDF') {
+                    blob = await generateMergedExcelFromPDF(files)
+                } else if (config.fromFormat === 'Word') {
+                    blob = await generateMergedExcelFromWord(files)
+                } else if (config.fromFormat === 'PPT') {
+                    blob = await generateMergedExcelFromPPT(files)
+                } else {
+                    throw new Error(`Unsupported format: ${config.fromFormat}`)
+                }
+
+                downloadBlob(blob, `${config.title.toLowerCase().replace(/\s+/g, '_')}_merged.xlsx`)
+                toast.success("Merged Excel Downloaded!")
                 return
             }
 

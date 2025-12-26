@@ -897,3 +897,129 @@ export const generateExcelFromPPT = async (file: File): Promise<Blob> => {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
 };
+
+/**
+ * Generate merged Excel from multiple PDFs
+ */
+export const generateMergedExcelFromPDF = async (files: File[]): Promise<Blob> => {
+    const pdfjs = await getPdfJs();
+    const rows: string[][] = [];
+
+    for (const file of files) {
+        rows.push([`--- ${file.name} ---`]);
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+
+            let fileText = '';
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map((item: any) => item.str).join(' ');
+                fileText += pageText + '\n';
+            }
+
+            if (fileText.trim()) {
+                const lines = fileText.split('\n').filter(l => l.trim()).map(l => [l]);
+                rows.push(...lines);
+            } else {
+                rows.push(['(No extracted text)']);
+            }
+        } catch (e) {
+            console.error(e);
+            rows.push([`Error processing ${file.name}`]);
+        }
+        rows.push([]);
+    }
+
+    const worksheet = utils.aoa_to_sheet(rows);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Merged Data');
+
+    return new Blob([write(workbook, { bookType: 'xlsx', type: 'array' })], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+};
+
+/**
+ * Generate merged Excel from multiple Word files
+ */
+export const generateMergedExcelFromWord = async (files: File[]): Promise<Blob> => {
+    const rows: string[][] = [];
+
+    for (const file of files) {
+        rows.push([`--- ${file.name} ---`]);
+        try {
+            const buffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+            const text = result.value;
+
+            if (text.trim()) {
+                const lines = text.split('\n').filter(l => l.trim()).map(l => [l]);
+                rows.push(...lines);
+            } else {
+                rows.push(['(No extracted text)']);
+            }
+        } catch (e) {
+            console.error(e);
+            rows.push([`Error processing ${file.name}`]);
+        }
+        rows.push([]);
+    }
+
+    const worksheet = utils.aoa_to_sheet(rows);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Merged Data');
+
+    return new Blob([write(workbook, { bookType: 'xlsx', type: 'array' })], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+};
+
+/**
+ * Generate merged Excel from multiple PPT files
+ */
+export const generateMergedExcelFromPPT = async (files: File[]): Promise<Blob> => {
+    const rows: string[][] = [];
+
+    for (const file of files) {
+        rows.push([`--- ${file.name} ---`]);
+        try {
+            const buffer = await file.arrayBuffer();
+            const zip = new JSZip();
+            const zipContent = await zip.loadAsync(buffer);
+
+            const slideFiles = Object.keys(zipContent.files)
+                .filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'))
+                .sort();
+
+            let fileHasText = false;
+            for (const slideFile of slideFiles) {
+                const slideXml = await zipContent.files[slideFile].async('text');
+                const textMatches = slideXml.match(/<a:t>([^<]+)<\/a:t>/g) || [];
+                const slideText = textMatches.map(match => match.replace(/<\/?a:t>/g, '')).join(' ');
+
+                if (slideText.trim()) {
+                    rows.push([slideText]);
+                    fileHasText = true;
+                }
+            }
+
+            if (!fileHasText) {
+                rows.push(['(No text found)']);
+            }
+        } catch (e) {
+            console.error(e);
+            rows.push([`Error processing ${file.name}`]);
+        }
+        rows.push([]);
+    }
+
+    const worksheet = utils.aoa_to_sheet(rows);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Merged Data');
+
+    return new Blob([write(workbook, { bookType: 'xlsx', type: 'array' })], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+};
