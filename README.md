@@ -1,30 +1,60 @@
 # Infygalaxy-OCR - AI-Powered OCR Platform
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+Welcome to **Infygalaxy-OCR**, a cutting-edge, free online OCR (Optical Character Recognition) tool designed to convert your images and documents into editable text with high accuracy.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/dhyans-projects-bc5e8a4e/v0-free-ocr-frontend-clone)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/kmWehi4wWwZ)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://ocr-extraction.com)
 
-## Overview
+## 🚀 Overview
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+Infygalaxy-OCR leverages advanced AI models to provide fast and accurate text extraction from various file formats. Whether you need to digitize scanned documents, extract text from screenshots, or convert PDFs, our platform makes it simple and efficient.
 
-## Deployment
+## ✨ Features
 
-Your project is live at:
+- **High Accuracy OCR**: Powered by advanced AI for precise text recognition.
+- **Multiple Formats**: Supports JPG, PNG, WEBP, and PDF.
+- **Privacy Focused**: Files are processed securely.
+- **Responsive Design**: Fully optimized for desktop and mobile devices.
+- **Blog & Insights**: Integrated blog for the latest updates on AI and OCR technologies.
 
-**[https://vercel.com/dhyans-projects-bc5e8a4e/v0-free-ocr-frontend-clone](https://vercel.com/dhyans-projects-bc5e8a4e/v0-free-ocr-frontend-clone)**
+## 🛠️ Tech Stack
 
-## Build your app
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/)
+- **Database**: [Supabase](https://supabase.com/) & [Prisma](https://www.prisma.io/)
+- **Deployment**: [Vercel](https://vercel.com/)
 
-Continue building your app on:
+## 💻 Getting Started
 
-**[https://v0.app/chat/kmWehi4wWwZ](https://v0.app/chat/kmWehi4wWwZ)**
+To run this project locally, follow these steps:
 
-## How It Works
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/dhyankarthik-code/free-ocr-app.git
+    ```
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+2.  **Install dependencies:**
+    ```bash
+    cd free-ocr-app
+    npm install
+    # or
+    pnpm install
+    ```
+
+3.  **Set up environment variables:**
+    Create a `.env` file in the root directory and add valid `DATABASE_URL` and other required keys.
+
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+
+5.  Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please run the existing tests and linting before submitting a pull request.
+
+## 📄 License
+
+This project is open-source and available under the information license.
