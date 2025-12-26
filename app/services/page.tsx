@@ -99,7 +99,7 @@ const services: ServiceSection[] = [
         ],
     },
 
-    // Row 2: Banking, Automobile, Travel
+    // Row 2: Banking, Automobile, Telecom
     {
         title: "Banking & Financial Services",
         icon: <Landmark className="w-6 h-6 text-emerald-700" />,
@@ -145,6 +145,52 @@ const services: ServiceSection[] = [
         ],
     },
     {
+        title: "Telecom",
+        icon: <Radio className="w-6 h-6 text-violet-500" />,
+        items: [
+            {
+                title: "Customer Onboarding Documents",
+                description: "Digitizes contracts and ID documents.",
+            },
+            {
+                title: "Billing & Invoice Processing",
+                description: "Extracts and validates billing data.",
+            },
+            {
+                title: "Operational Data Capture",
+                description: "Converts network and service records into text.",
+            },
+            {
+                title: "Performance Analytics",
+                description: "Enables data-driven operational decisions.",
+            },
+        ],
+    },
+
+    // Row 3: Oil & Gas, Travel, Hospitality
+    {
+        title: "Oil & Gas",
+        icon: <Fuel className="w-6 h-6 text-orange-600" />,
+        items: [
+            {
+                title: "Inspection & Safety Data Capture",
+                description: "Digitizes safety logs and inspection reports.",
+            },
+            {
+                title: "Operational Document Processing",
+                description: "Converts drilling and maintenance records into text.",
+            },
+            {
+                title: "Compliance Reporting",
+                description: "Supports regulatory and audit requirements.",
+            },
+            {
+                title: "Operational Analytics",
+                description: "Provides insights for performance and risk management.",
+            },
+        ],
+    },
+    {
         title: "Travel",
         icon: <Plane className="w-6 h-6 text-sky-500" />,
         items: [
@@ -166,27 +212,49 @@ const services: ServiceSection[] = [
             },
         ],
     },
-
-    // Row 3: Finance, Legal, Oil & Gas
     {
-        title: "Finance",
-        icon: <DollarSign className="w-6 h-6 text-emerald-600" />,
+        title: "Hospitality",
+        icon: <Hotel className="w-6 h-6 text-indigo-500" />,
         items: [
             {
-                title: "Financial Document Extraction",
-                description: "Digitizes invoices, statements, and tax records.",
+                title: "Guest & Vendor Document Capture",
+                description: "Digitizes booking, billing, and vendor records.",
             },
             {
-                title: "Data Structuring & Validation",
-                description: "Ensures accuracy before routing into financial systems.",
+                title: "Invoice & Procurement Processing",
+                description: "Automates financial document handling.",
             },
             {
-                title: "Automated Reporting",
-                description: "Generates summaries for reconciliation and audits.",
+                title: "Centralized Data Management",
+                description: "Stores all documents in a unified digital system.",
             },
             {
-                title: "Risk & Compliance Support",
-                description: "Reduces manual errors and compliance gaps.",
+                title: "Operational Analytics",
+                description: "Identifies cost savings and service improvement opportunities.",
+            },
+        ],
+    },
+
+    // Row 4+: Food & Beverages, Legal, Documentation, Logistics, Finance
+    {
+        title: "Food & Beverages",
+        icon: <Utensils className="w-6 h-6 text-red-500" />,
+        items: [
+            {
+                title: "Quality Control Documentation",
+                description: "Digitizes production and quality inspection logs.",
+            },
+            {
+                title: "Label & Packaging Data Capture",
+                description: "Extracts data for traceability and compliance.",
+            },
+            {
+                title: "Inventory & Supplier Analysis",
+                description: "Supports stock optimization and vendor monitoring.",
+            },
+            {
+                title: "Regulatory Reporting",
+                description: "Ensures adherence to food safety standards.",
             },
         ],
     },
@@ -212,30 +280,6 @@ const services: ServiceSection[] = [
             },
         ],
     },
-    {
-        title: "Oil & Gas",
-        icon: <Fuel className="w-6 h-6 text-orange-600" />,
-        items: [
-            {
-                title: "Inspection & Safety Data Capture",
-                description: "Digitizes safety logs and inspection reports.",
-            },
-            {
-                title: "Operational Document Processing",
-                description: "Converts drilling and maintenance records into text.",
-            },
-            {
-                title: "Compliance Reporting",
-                description: "Supports regulatory and audit requirements.",
-            },
-            {
-                title: "Operational Analytics",
-                description: "Provides insights for performance and risk management.",
-            },
-        ],
-    },
-
-    // Row 4+: Remaining items
     {
         title: "Documentation & Records",
         icon: <FileText className="w-6 h-6 text-gray-500" />,
@@ -281,68 +325,24 @@ const services: ServiceSection[] = [
         ],
     },
     {
-        title: "Food & Beverages",
-        icon: <Utensils className="w-6 h-6 text-red-500" />,
+        title: "Finance",
+        icon: <DollarSign className="w-6 h-6 text-emerald-600" />,
         items: [
             {
-                title: "Quality Control Documentation",
-                description: "Digitizes production and quality inspection logs.",
+                title: "Financial Document Extraction",
+                description: "Digitizes invoices, statements, and tax records.",
             },
             {
-                title: "Label & Packaging Data Capture",
-                description: "Extracts data for traceability and compliance.",
+                title: "Data Structuring & Validation",
+                description: "Ensures accuracy before routing into financial systems.",
             },
             {
-                title: "Inventory & Supplier Analysis",
-                description: "Supports stock optimization and vendor monitoring.",
+                title: "Automated Reporting",
+                description: "Generates summaries for reconciliation and audits.",
             },
             {
-                title: "Regulatory Reporting",
-                description: "Ensures adherence to food safety standards.",
-            },
-        ],
-    },
-    {
-        title: "Hospitality",
-        icon: <Hotel className="w-6 h-6 text-indigo-500" />,
-        items: [
-            {
-                title: "Guest & Vendor Document Capture",
-                description: "Digitizes booking, billing, and vendor records.",
-            },
-            {
-                title: "Invoice & Procurement Processing",
-                description: "Automates financial document handling.",
-            },
-            {
-                title: "Centralized Data Management",
-                description: "Stores all documents in a unified digital system.",
-            },
-            {
-                title: "Operational Analytics",
-                description: "Identifies cost savings and service improvement opportunities.",
-            },
-        ],
-    },
-    {
-        title: "Telecom",
-        icon: <Radio className="w-6 h-6 text-violet-500" />,
-        items: [
-            {
-                title: "Customer Onboarding Documents",
-                description: "Digitizes contracts and ID documents.",
-            },
-            {
-                title: "Billing & Invoice Processing",
-                description: "Extracts and validates billing data.",
-            },
-            {
-                title: "Operational Data Capture",
-                description: "Converts network and service records into text.",
-            },
-            {
-                title: "Performance Analytics",
-                description: "Enables data-driven operational decisions.",
+                title: "Risk & Compliance Support",
+                description: "Reduces manual errors and compliance gaps.",
             },
         ],
     },
