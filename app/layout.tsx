@@ -49,6 +49,9 @@ export const metadata: Metadata = {
     ],
     siteName: 'Free OCR Extraction',
   },
+  alternates: {
+    canonical: './',
+  },
   twitter: {
     card: 'summary_large_image',
     title: "Best Free OCR: Image to Text Converter",

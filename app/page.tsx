@@ -12,6 +12,7 @@ export default function Home() {
         <div className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 text-center text-balance min-h-[4rem] flex items-center justify-center">
           {/* SEO H1 (Visually Hidden but accessible to crawlers) */}
           <h1 className="text-gray-900 text-center">
+            <span className="sr-only">Free OCR Extraction Tool - Convert Images to Text, Excel & PDF</span>
             <TypeAnimation
               sequence={[
                 'Free OCR Extraction tool',

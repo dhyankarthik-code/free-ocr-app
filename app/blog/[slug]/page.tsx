@@ -30,6 +30,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
                 ? [post._embedded['wp:featuredmedia'][0].source_url]
                 : [],
         },
+        alternates: {
+            canonical: `/blog/${slug}`,
+        },
     };
 }
 
@@ -49,6 +52,10 @@ export default async function BlogPostPage({ params }: PageProps) {
         day: 'numeric'
     });
     const author = post._embedded?.author?.[0]?.name || 'Team';
+
+    // Fix mixed content issues by replacing http with https in content
+    const sanitizedContent = post.content.rendered.replace(/http:\/\/([^\s"']+)/g, 'https://$1');
+    const sanitizedTitle = post.title.rendered.replace(/http:\/\/([^\s"']+)/g, 'https://$1');
 
     return (
         <div className="bg-white pt-24 pb-16">
@@ -77,7 +84,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                     <h1
                         className="text-3xl md:text-5xl font-bold text-gray-900 leading-tight mb-8"
-                        dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+                        dangerouslySetInnerHTML={{ __html: sanitizedTitle }}
                     />
 
                     {imageUrl && (
@@ -94,7 +101,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 {/* Content */}
                 <div
                     className="prose prose-lg md:prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-red-600 hover:prose-a:text-red-700 prose-img:rounded-xl prose-img:shadow-md"
-                    dangerouslySetInnerHTML={{ __html: post.content.rendered }}
+                    dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                 />
 
                 {/* Original Source Link */}
